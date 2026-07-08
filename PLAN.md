@@ -34,8 +34,16 @@ idolist is a personal operating system — a single-page application built aroun
 ✅ Phase 22 — Multi-column tree (Progress bar, Today sun toggle, Due date columns)
 ✅ Phase 23 — Right panel redesign (TodayPanel + LifeProgressPanel, NodeDetails overlay)
 ✅ Phase 24 — Left sidebar redesign (Life/Today/Inbox/Search/Graph/Calendar/Notes, Areas section)
-✅ Phase 25 — Tree toolbar ("My Life" h1 + subtitle, "New Item" bottom button)
+✅ Phase 25 — Tree toolbar ("idolist" h1 + subtitle, "New Item" bottom button)
 ✅ Phase 26 — Visual design pass (40px rows, depth-0 bold, 210/260px panel widths)
+✅ Phase 27 — Rebrand to idolist (title, metadata, favicon SVG, all copy updated)
+✅ Phase 28 — Repeat tasks (daily/weekly/monthly, checkRepeatingTasks on mount, lastCompletedAt)
+✅ Phase 29 — Upcoming as full page view (sidebar nav item, badge count, replaces panel widget)
+✅ Phase 30 — Life Progress moved to sidebar (replaces Areas section, fills nav space)
+✅ Phase 31 — Resizable panels (drag handles, sidebar 160–400px, right panel 200–500px, persisted)
+✅ Phase 32 — Inbox view (working full page, __inbox__ hidden root, quick-capture, move to area)
+✅ Phase 33 — NLP date parsing in Inbox (chrono-node, live preview chip, date stripped from title)
+✅ Phase 34 — Time support (dueTime field, NLP extracts explicit hour, shown in Today/Upcoming/Inbox/tree)
 ```
 
 ---
@@ -406,7 +414,104 @@ src/
 ✅ Phase 24 → Left sidebar redesign (new nav, sparkline, area tags)
 ✅ Phase 25 → Tree toolbar (subtitle, New Item button)
 ✅ Phase 26 → Visual design pass (match mockup proportions + typography)
+✅ Phase 27 → Rebrand to idolist
+✅ Phase 28 → Repeat tasks (daily / weekly / monthly)
+✅ Phase 29 → Upcoming as full page nav view
+✅ Phase 30 → Life Progress consolidated to sidebar
+✅ Phase 31 → Resizable panels (drag handles, localStorage)
+✅ Phase 32 → Inbox view (capture, move to area, badge)
+✅ Phase 33 → NLP date parsing (chrono-node, live chip)
+✅ Phase 34 → Time support (dueTime field, NLP + manual picker)
 ```
+
+---
+
+### PHASE 27 — Rebrand to idolist ✅ DONE
+
+- [x] All "LifeOS" / "My Life" copy → "idolist"
+- [x] `layout.tsx` title + description updated
+- [x] `LifeOSStore` type → `IdolistStore`
+- [x] `src/app/icon.svg` — blue rounded square + 🌿 emoji, replaces Next.js boilerplate favicon
+- [x] README, AGENTS.md, PLAN.md rewritten to reflect idolist brand
+
+---
+
+### PHASE 28 — Repeat Tasks ✅ DONE
+
+- [x] `RepeatOption = "none" | "daily" | "weekly" | "monthly"` added to types
+- [x] `repeat` and `lastCompletedAt: number | null` fields on `LifeNode`
+- [x] `toggleComplete` stamps `lastCompletedAt = Date.now()` on completion
+- [x] `checkRepeatingTasks()` store action — resets `completed: false` when period has rolled over
+- [x] Called alongside `checkTodayReset()` in `AppShell` on mount
+- [x] Repeat picker in `NodeDetails` (pill buttons, hidden for areas)
+- [x] Due column shows `↺` symbol when repeat is set and no dueDate
+- [x] `loadState` patches existing nodes: `repeat: "none"`, `lastCompletedAt: null`
+
+---
+
+### PHASE 29 — Upcoming as Full Page View ✅ DONE
+
+- [x] `"upcoming"` added to `View` type
+- [x] Upcoming nav item added to Sidebar (Clock icon, between Today and Inbox)
+- [x] Badge count wired to `selectUpcomingCount(nodes)`
+- [x] Removed earlier UpcomingPanel widget from right panel
+
+---
+
+### PHASE 30 — Life Progress Consolidated to Sidebar ✅ DONE
+
+- [x] `LifeProgressPanel` moved into Sidebar, fills space between nav and Settings button
+- [x] Removed redundant Areas section + `AREA_COLORS` from `Sidebar.tsx`
+- [x] `LifeProgressPanel` removed from `ContextPanel`
+- [x] `TodayPanel` now takes `fillHeight` prop — expands to fill right panel when no Life Progress below it
+
+---
+
+### PHASE 31 — Resizable Panels ✅ DONE
+
+- [x] Layout changed from CSS Grid to Flexbox in `AppShell`
+- [x] `ResizeHandle` component (6px wide, 1px visual line, `col-resize` cursor)
+- [x] Left handle resizes sidebar: 160px min → 400px max
+- [x] Right handle resizes context panel: 200px min → 500px max
+- [x] Widths persisted to `localStorage` (`idolist-sidebar-width`, `idolist-panel-width`)
+- [x] Restored on next load with clamping to min/max bounds
+- [x] `document.body.userSelect = "none"` during drag to prevent text selection
+
+---
+
+### PHASE 32 — Inbox View ✅ DONE
+
+- [x] `"inbox"` added to `View` type; `INBOX_ID = "__inbox__"` constant exported from types
+- [x] Hidden `__inbox__` root area node initialized in store on startup (not shown in LifeTree or LifeProgressPanel)
+- [x] `addToInbox(title)` store action — creates task as child of `__inbox__`
+- [x] `InboxView.tsx` — quick-capture input (Enter to add, Escape to clear), pending + completed sections
+- [x] Hover actions per item: checkbox, move-to-area dropdown, delete
+- [x] Inbox nav item wired up in Sidebar (was previously dimmed no-op)
+- [x] Badge count shows pending (uncompleted, non-archived) inbox items
+
+---
+
+### PHASE 33 — NLP Date Parsing ✅ DONE
+
+- [x] `chrono-node` installed for natural language date parsing
+- [x] `src/lib/nlp.ts` — `parseTask(input)` strips date phrase from title, returns `dueDate`, `isToday`, `reminder`, `dateLabel`
+- [x] Live preview chip in Inbox input (Calendar icon + human label e.g. "Tomorrow", "Fri, Dec 5")
+- [x] On submit: `dueDate`, `reminder`, and `todayIds` set automatically from parsed result
+- [x] Falls back gracefully when no date is detected
+
+---
+
+### PHASE 34 — Time Support ✅ DONE
+
+- [x] `dueTime: string | null` field added to `LifeNode` ("HH:mm" 24-hour)
+- [x] `loadState` patches existing nodes with `dueTime: null`
+- [x] NLP: uses `result.start.isCertain("hour")` — time only extracted when explicitly mentioned
+- [x] NLP preview chip extended: "Tomorrow at 2:00 PM", "Fri, Dec 5 at 9:30 AM"
+- [x] `NodeDetails` — due date + time inputs side by side; time disabled until date is set
+- [x] Tree row due column: shows "Dec 5 2:00pm" when time set (`COL_DUE` widened 72→100px)
+- [x] Today panel sidebar: time shown in muted text after title
+- [x] Upcoming view date chips: "Today · 2:00pm", "Tomorrow · 9:30am"
+- [x] Inbox item list: date chip shows "Dec 5 · 2:00pm" when time set
 
 ---
 
