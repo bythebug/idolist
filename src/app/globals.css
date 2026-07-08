@@ -13,8 +13,8 @@
 :root {
   /* ── Surfaces */
   --bg-app:              #FFFFFF;
-  --bg-sidebar:          #F7F7F5;       /* barely warm off-white — Notion sidebar */
-  --bg-panel:            #FBFBFA;       /* right panel — almost white */
+  --bg-sidebar:          #FAFAF9;       /* barely warm — 5-step delta, no hard edge */
+  --bg-panel:            #FDFDFB;       /* right panel — almost same as canvas */
 
   /* Node / row states — warm tint, not cold black */
   --bg-node-hover:       rgba(55, 53, 47, 0.06);

@@ -30,10 +30,10 @@ function ResizeHandle({ onDragStart }: { onDragStart: (e: React.MouseEvent) => v
       onMouseDown={onDragStart}
       style={{ width: 6, flexShrink: 0, cursor: "col-resize", position: "relative", zIndex: 10 }}
       onMouseEnter={(e) => {
-        ((e.currentTarget as HTMLElement).firstChild as HTMLElement).style.background = "var(--accent)";
+        ((e.currentTarget as HTMLElement).firstChild as HTMLElement).style.opacity = "1";
       }}
       onMouseLeave={(e) => {
-        ((e.currentTarget as HTMLElement).firstChild as HTMLElement).style.background = "var(--border)";
+        ((e.currentTarget as HTMLElement).firstChild as HTMLElement).style.opacity = "0";
       }}
     >
       <div
@@ -43,8 +43,9 @@ function ResizeHandle({ onDragStart }: { onDragStart: (e: React.MouseEvent) => v
           bottom: 0,
           left: 2,
           width: 1,
-          background: "var(--border)",
-          transition: "background 120ms",
+          background: "var(--accent)",
+          opacity: 0,
+          transition: "opacity 150ms",
           pointerEvents: "none",
         }}
       />
