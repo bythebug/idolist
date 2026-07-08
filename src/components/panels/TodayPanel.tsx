@@ -131,6 +131,11 @@ export function TodayPanel({ fillHeight = false }: { fillHeight?: boolean }) {
               >
                 {node.title}
               </span>
+              {node.dueTime && (
+                <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>
+                  {format(new Date(`1970-01-01T${node.dueTime}`), "h:mma")}
+                </span>
+              )}
               <button
                 onClick={() => removeFromToday(node.id)}
                 aria-label="Remove from today"
