@@ -79,6 +79,20 @@ export function getCompletionRatio(nodes: Record<string, LifeNode>): number {
   return completed / leaves.length;
 }
 
+export function getSubtreeCompletionRatio(
+  nodes: Record<string, LifeNode>,
+  id: string
+): number {
+  const subtreeIds = getSubtree(nodes, id);
+  const leaves = subtreeIds.filter((sid) => {
+    const n = nodes[sid];
+    return n && n.childIds.length === 0 && !n.archived;
+  });
+  if (leaves.length === 0) return 0;
+  const completed = leaves.filter((sid) => nodes[sid]?.completed).length;
+  return completed / leaves.length;
+}
+
 export function isDescendant(
   nodes: Record<string, LifeNode>,
   ancestorId: string,

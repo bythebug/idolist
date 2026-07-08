@@ -18,7 +18,7 @@ import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
 import { selectVisibleNodes } from "@/store/selectors";
 import { isDescendant } from "@/lib/tree";
-import { TreeNode } from "./TreeNode";
+import { TreeNode, COL_PROGRESS, COL_TODAY, COL_DUE } from "./TreeNode";
 import { TreeDropIndicator } from "./TreeDropIndicator";
 
 interface DragInfo {
@@ -284,6 +284,59 @@ export function LifeTree() {
             <Plus size={12} />
             Add area
           </button>
+        </div>
+
+        {/* Column headers */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            padding: "0 12px",
+            height: 28,
+            borderBottom: "1px solid var(--border-subtle)",
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ flex: 1 }} />
+          <div
+            style={{
+              width: COL_PROGRESS,
+              fontSize: 10,
+              fontWeight: 600,
+              color: "var(--text-muted)",
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              paddingRight: 8,
+            }}
+          >
+            Progress
+          </div>
+          <div
+            style={{
+              width: COL_TODAY,
+              fontSize: 10,
+              fontWeight: 600,
+              color: "var(--text-muted)",
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              textAlign: "center",
+            }}
+          >
+            Today
+          </div>
+          <div
+            style={{
+              width: COL_DUE,
+              fontSize: 10,
+              fontWeight: 600,
+              color: "var(--text-muted)",
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              paddingRight: 8,
+            }}
+          >
+            Due
+          </div>
         </div>
 
         {/* Virtualized tree */}
