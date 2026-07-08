@@ -24,7 +24,7 @@ const NAV_ITEMS: { id: View; label: string; icon: React.ComponentType<{ size?: n
 ];
 
 export function Sidebar() {
-  const { view, nodes, rootIds, todayIds, setView, openCommandPalette } = useStore(
+  const { view, nodes, rootIds, todayIds, setView, openCommandPalette, openSettings } = useStore(
     useShallow((s) => ({
       view: s.view,
       nodes: s.nodes,
@@ -32,6 +32,7 @@ export function Sidebar() {
       todayIds: s.todayIds,
       setView: s.setView,
       openCommandPalette: s.openCommandPalette,
+      openSettings: s.openSettings,
     }))
   );
 
@@ -206,6 +207,7 @@ export function Sidebar() {
         </div>
 
         <button
+          onClick={openSettings}
           style={{
             marginTop: 10,
             width: "100%",

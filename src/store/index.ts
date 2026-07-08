@@ -40,6 +40,7 @@ interface StoreState {
   view: View;
   commandPaletteOpen: boolean;
   shortcutsOpen: boolean;
+  settingsOpen: boolean;
   todayIds: Set<string>;
   lastResetDate: string;
   dragState: DragState | null;
@@ -73,6 +74,8 @@ interface StoreActions {
   closeCommandPalette: () => void;
   openShortcuts: () => void;
   closeShortcuts: () => void;
+  openSettings: () => void;
+  closeSettings: () => void;
 
   // Today
   addToToday: (id: string) => void;
@@ -148,6 +151,7 @@ function loadInitialState(): StoreState {
     view: persisted.view ?? "life",
     commandPaletteOpen: false,
     shortcutsOpen: false,
+    settingsOpen: false,
     dragState: null,
     darkMode: persisted.darkMode ?? false,
     undoStack: [],
@@ -169,6 +173,7 @@ function emptyState(): StoreState {
     view: "life",
     commandPaletteOpen: false,
     shortcutsOpen: false,
+    settingsOpen: false,
     dragState: null,
     darkMode: false,
     undoStack: [],
@@ -555,6 +560,16 @@ export const useStore = create<LifeOSStore>()(
       closeShortcuts: () =>
         set((state) => {
           state.shortcutsOpen = false;
+        }),
+
+      openSettings: () =>
+        set((state) => {
+          state.settingsOpen = true;
+        }),
+
+      closeSettings: () =>
+        set((state) => {
+          state.settingsOpen = false;
         }),
 
       addToToday: (id) => {

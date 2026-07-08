@@ -10,19 +10,22 @@ import { TodayView } from "@/components/panels/TodayView";
 import { UpcomingView } from "@/components/panels/UpcomingView";
 import { CompletedView } from "@/components/panels/CompletedView";
 import { ArchiveView } from "@/components/panels/ArchiveView";
+import { SettingsModal } from "@/components/overlays/SettingsModal";
 import { CommandPalette } from "@/components/overlays/CommandPalette";
 import { ShortcutsModal } from "@/components/overlays/ShortcutsModal";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import { Toast } from "@/components/ui/Toast";
 
 export function AppShell() {
-  const { view, darkMode, commandPaletteOpen, shortcutsOpen, checkTodayReset } =
+  const { view, darkMode, commandPaletteOpen, shortcutsOpen, settingsOpen, checkTodayReset, closeSettings } =
     useStore(useShallow((s) => ({
       view: s.view,
       darkMode: s.darkMode,
       commandPaletteOpen: s.commandPaletteOpen,
       shortcutsOpen: s.shortcutsOpen,
+      settingsOpen: s.settingsOpen,
       checkTodayReset: s.checkTodayReset,
+      closeSettings: s.closeSettings,
     })));
 
   useEffect(() => {
@@ -70,6 +73,7 @@ export function AppShell() {
 
       {commandPaletteOpen && <CommandPalette />}
       {shortcutsOpen && <ShortcutsModal />}
+      {settingsOpen && <SettingsModal onClose={closeSettings} />}
       <Toast />
     </div>
   );
