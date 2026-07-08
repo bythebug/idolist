@@ -211,8 +211,10 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
         {/* Icon */}
         <TreeNodeIcon id={id} icon={node.icon} depth={depth} type={node.type} />
 
-        {/* Checkbox */}
-        <TreeNodeCheckbox completed={node.completed} onToggle={() => toggleComplete(id)} />
+        {/* Checkbox — areas don't have checkboxes */}
+        {depth > 0 && (
+          <TreeNodeCheckbox completed={node.completed} onToggle={() => toggleComplete(id)} />
+        )}
 
         {/* Title */}
         <TreeNodeTitle id={id} title={node.title} completed={node.completed} isEditing={isEditing} depth={depth} />
