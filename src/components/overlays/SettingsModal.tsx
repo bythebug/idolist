@@ -117,6 +117,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
           </h3>
           <button
             onClick={onClose}
+            aria-label="Close settings"
             style={{
               background: "transparent",
               border: "none",

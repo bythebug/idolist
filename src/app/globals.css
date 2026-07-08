@@ -32,7 +32,13 @@
   --success:             #10B981;
   --success-subtle:      rgba(16, 185, 129, 0.1);
   --warning:             #F59E0B;
+  --warning-subtle:      rgba(245, 158, 11, 0.1);
+  --warning-subtle-2:    rgba(245, 158, 11, 0.2);
   --danger:              #EF4444;
+  --danger-subtle:       rgba(239, 68, 68, 0.08);
+  --danger-subtle-2:     rgba(239, 68, 68, 0.1);
+  --danger-subtle-3:     rgba(239, 68, 68, 0.15);
+  --danger-subtle-4:     rgba(239, 68, 68, 0.2);
 
   /* Radius */
   --radius-sm:           6px;
@@ -72,6 +78,13 @@
   --shadow:              0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.04);
   --shadow-lg:           0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06);
   --shadow-overlay:      0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+
+  --warning-subtle:      rgba(245, 158, 11, 0.12);
+  --warning-subtle-2:    rgba(245, 158, 11, 0.22);
+  --danger-subtle:       rgba(239, 68, 68, 0.1);
+  --danger-subtle-2:     rgba(239, 68, 68, 0.12);
+  --danger-subtle-3:     rgba(239, 68, 68, 0.18);
+  --danger-subtle-4:     rgba(239, 68, 68, 0.22);
 }
 
 /* ─── Tailwind theme mapping ─────────────────────────────────── */

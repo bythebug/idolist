@@ -104,6 +104,7 @@ export function ShortcutsModal() {
           </h3>
           <button
             onClick={closeShortcuts}
+            aria-label="Close shortcuts"
             style={{
               background: "transparent",
               border: "none",

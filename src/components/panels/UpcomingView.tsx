@@ -107,9 +107,9 @@ function UpcomingItem({ node, daysUntil, nodes }: ItemProps) {
           padding: "2px 7px",
           borderRadius: 6,
           background: isOverdue
-            ? "rgba(239, 68, 68, 0.1)"
+            ? "var(--danger-subtle-2)"
             : daysUntil === 0
-            ? "rgba(245, 158, 11, 0.1)"
+            ? "var(--warning-subtle)"
             : "var(--bg-sidebar)",
           color: isOverdue
             ? "var(--danger)"
@@ -118,9 +118,9 @@ function UpcomingItem({ node, daysUntil, nodes }: ItemProps) {
             : "var(--text-secondary)",
           border: `1px solid ${
             isOverdue
-              ? "rgba(239, 68, 68, 0.2)"
+              ? "var(--danger-subtle-4)"
               : daysUntil === 0
-              ? "rgba(245, 158, 11, 0.2)"
+              ? "var(--warning-subtle-2)"
               : "var(--border)"
           }`,
         }}
@@ -230,8 +230,8 @@ export function UpcomingView() {
             alignItems: "center",
             gap: 8,
             padding: "8px 16px",
-            background: "rgba(239, 68, 68, 0.08)",
-            borderBottom: "1px solid rgba(239, 68, 68, 0.15)",
+            background: "var(--danger-subtle)",
+            borderBottom: "1px solid var(--danger-subtle-3)",
             fontSize: 12,
             color: "var(--danger)",
             flexShrink: 0,
