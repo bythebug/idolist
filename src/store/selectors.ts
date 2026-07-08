@@ -82,7 +82,7 @@ export function selectSearchIndex(
   nodes: Record<string, LifeNode>
 ): SearchResult[] {
   return Object.values(nodes)
-    .filter((n) => !n.archived)
+    .filter((n) => !n.archived && n.id !== INBOX_ID && n.title.trim() !== "")
     .map((n) => {
       const chain = getParentChain(nodes, n.id);
       return {

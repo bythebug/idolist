@@ -14,14 +14,13 @@ export function CommandPalette() {
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { nodes, rootIds, collapsedIds, closeCommandPalette, setFocused, setSelected, expandAll } =
+  const { nodes, closeCommandPalette, setFocused, setSelected, setView, expandAll } =
     useStore(useShallow((s) => ({
       nodes: s.nodes,
-      rootIds: s.rootIds,
-      collapsedIds: s.collapsedIds,
       closeCommandPalette: s.closeCommandPalette,
       setFocused: s.setFocused,
       setSelected: s.setSelected,
+      setView: s.setView,
       expandAll: s.expandAll,
     })));
 
@@ -46,10 +45,10 @@ export function CommandPalette() {
   }, [query]);
 
   function selectResult(result: SearchResult) {
+    setView("life");
+    expandAll();
     setFocused(result.id);
     setSelected(result.id);
-    // Expand parents so the node is visible
-    expandAll();
     closeCommandPalette();
   }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useCallback } from "react";
 import {
   Home,
   Sun,
@@ -10,6 +11,7 @@ import {
   Calendar,
   StickyNote,
   Settings,
+  Plus,
 } from "lucide-react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
@@ -17,6 +19,7 @@ import { selectTodayCount, selectUpcomingCount } from "@/store/selectors";
 import { LifeProgressPanel } from "@/components/panels/LifeProgressPanel";
 import type { View } from "@/types";
 import { INBOX_ID } from "@/types";
+import { parseTask } from "@/lib/nlp";
 
 const NAV_ITEMS: { id: View | "graph" | "calendar" | "notes"; label: string; icon: React.ComponentType<{ size?: number }>; view?: View }[] = [
   { id: "life",     label: "Life",     icon: Home,       view: "life" },
@@ -30,7 +33,11 @@ const NAV_ITEMS: { id: View | "graph" | "calendar" | "notes"; label: string; ico
 ];
 
 export function Sidebar() {
-  const { view, nodes, todayIds, userName, userAvatar, setView, openCommandPalette, openSettings } = useStore(
+  const {
+    view, nodes, todayIds, userName, userAvatar,
+    setView, openCommandPalette, openSettings,
+    addToInbox, addToToday, updateNode,
+  } = useStore(
     useShallow((s) => ({
       view: s.view,
       nodes: s.nodes,
@@ -40,12 +47,42 @@ export function Sidebar() {
       setView: s.setView,
       openCommandPalette: s.openCommandPalette,
       openSettings: s.openSettings,
+      addToInbox: s.addToInbox,
+      addToToday: s.addToToday,
+      updateNode: s.updateNode,
     }))
   );
 
   const todayCount = selectTodayCount(nodes, todayIds);
   const upcomingCount = selectUpcomingCount(nodes);
-  const inboxCount = (nodes[INBOX_ID]?.childIds ?? []).filter((id) => nodes[id] && !nodes[id].archived && !nodes[id].completed).length;
+  const inboxCount = (nodes[INBOX_ID]?.childIds ?? []).filter(
+    (id) => nodes[id] && !nodes[id].archived && !nodes[id].completed
+  ).length;
+
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [draft, setDraft] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const openQuickAdd = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setQuickAddOpen(true);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }, []);
+
+  function submitQuickAdd() {
+    if (!draft.trim()) { setQuickAddOpen(false); return; }
+    const parsed = parseTask(draft);
+    const id = addToInbox(parsed.title);
+    if (parsed.dueDate) updateNode(id, { dueDate: parsed.dueDate, dueTime: parsed.dueTime ?? null });
+    addToToday(id);
+    setDraft("");
+    setQuickAddOpen(false);
+  }
+
+  function handleQuickAddKey(e: React.KeyboardEvent) {
+    if (e.key === "Enter") { e.preventDefault(); submitQuickAdd(); }
+    if (e.key === "Escape") { setDraft(""); setQuickAddOpen(false); }
+  }
 
   return (
     <aside
@@ -62,7 +99,6 @@ export function Sidebar() {
         onClick={openSettings}
         style={{
           padding: "12px 14px",
-          borderBottom: "1px solid var(--border-subtle)",
           flexShrink: 0,
           display: "flex",
           alignItems: "center",
@@ -75,7 +111,6 @@ export function Sidebar() {
           textAlign: "left",
         }}
       >
-        {/* Avatar */}
         <div
           style={{
             width: 30,
@@ -94,7 +129,6 @@ export function Sidebar() {
         >
           {userAvatar || (userName ? userName[0].toUpperCase() : "🌿")}
         </div>
-        {/* Name */}
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {userName || "idolist"}
@@ -109,58 +143,119 @@ export function Sidebar() {
           const Icon = item.icon;
           const isActive = item.view ? view === item.view : false;
           const isAvailable = !!item.view;
-          const badge = item.id === "today" ? todayCount : item.id === "upcoming" ? upcomingCount : item.id === "inbox" ? inboxCount : 0;
+          const badge =
+            item.id === "today" ? todayCount :
+            item.id === "upcoming" ? upcomingCount :
+            item.id === "inbox" ? inboxCount : 0;
+          const isToday = item.id === "today";
 
           return (
-            <button
-              key={item.id}
-              onClick={() => {
-                if (item.id === "search") { openCommandPalette(); return; }
-                if (item.view) setView(item.view);
-              }}
-              title={!isAvailable && item.id !== "search" ? "Coming soon" : undefined}
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "6px 10px",
-                background: isActive ? "var(--bg-node-selected)" : "transparent",
-                border: "none",
-                borderRadius: 7,
-                cursor: isAvailable || item.id === "search" ? "pointer" : "default",
-                color: isActive
-                  ? "var(--text-primary)"
-                  : !isAvailable && item.id !== "search"
-                  ? "var(--text-muted)"
-                  : "var(--text-secondary)",
-                fontSize: 13,
-                fontFamily: "inherit",
-                fontWeight: isActive ? 500 : 400,
-                textAlign: "left",
-                marginBottom: 1,
-                opacity: !isAvailable && item.id !== "search" ? 0.5 : 1,
-              }}
-            >
-              <Icon size={14} />
-              <span style={{ flex: 1 }}>{item.label}</span>
-              {badge > 0 && (
-                <span
+            <div key={item.id}>
+              <button
+                onClick={() => {
+                  if (item.id === "search") { openCommandPalette(); return; }
+                  if (item.view) setView(item.view);
+                }}
+                title={!isAvailable && item.id !== "search" ? "Coming soon" : undefined}
+                className="sidebar-nav-item"
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "6px 10px",
+                  background: isActive ? "var(--bg-node-selected)" : "transparent",
+                  border: "none",
+                  borderRadius: 7,
+                  cursor: isAvailable || item.id === "search" ? "pointer" : "default",
+                  color: isActive ? "var(--text-primary)" : !isAvailable && item.id !== "search" ? "var(--text-muted)" : "var(--text-secondary)",
+                  fontSize: 13,
+                  fontFamily: "inherit",
+                  fontWeight: isActive ? 500 : 400,
+                  textAlign: "left",
+                  marginBottom: 1,
+                  opacity: !isAvailable && item.id !== "search" ? 0.5 : 1,
+                  position: "relative",
+                }}
+              >
+                <Icon size={14} />
+                <span style={{ flex: 1 }}>{item.label}</span>
+                {badge > 0 && (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      background: "var(--accent-subtle)",
+                      color: "var(--accent)",
+                      padding: "1px 6px",
+                      borderRadius: 99,
+                      minWidth: 18,
+                      textAlign: "center",
+                    }}
+                  >
+                    {badge}
+                  </span>
+                )}
+                {/* + button visible on hover for Today */}
+                {isToday && (
+                  <span
+                    role="button"
+                    onClick={openQuickAdd}
+                    className="today-add-btn"
+                    title="Quick add to Today"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 18,
+                      height: 18,
+                      borderRadius: 4,
+                      color: "var(--text-muted)",
+                      opacity: 0,
+                      transition: "opacity 120ms",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Plus size={13} />
+                  </span>
+                )}
+              </button>
+
+              {/* Inline quick-add — only for Today */}
+              {isToday && quickAddOpen && (
+                <div
                   style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    background: "var(--accent-subtle)",
-                    color: "var(--accent)",
-                    padding: "1px 6px",
-                    borderRadius: 99,
-                    minWidth: 18,
-                    textAlign: "center",
+                    margin: "2px 4px 4px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "5px 8px",
+                    background: "var(--bg-node-hover)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 6,
                   }}
                 >
-                  {badge}
-                </span>
+                  <Sun size={11} style={{ color: "var(--accent)", flexShrink: 0 }} />
+                  <input
+                    ref={inputRef}
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={handleQuickAddKey}
+                    onBlur={() => { if (!draft.trim()) setQuickAddOpen(false); }}
+                    placeholder="Add to today…"
+                    style={{
+                      flex: 1,
+                      border: "none",
+                      background: "transparent",
+                      outline: "none",
+                      fontSize: 12,
+                      color: "var(--text-primary)",
+                      fontFamily: "inherit",
+                    }}
+                  />
+                </div>
               )}
-            </button>
+            </div>
           );
         })}
       </nav>
@@ -179,13 +274,7 @@ export function Sidebar() {
       </div>
 
       {/* Settings */}
-      <div
-        style={{
-          padding: "8px 8px",
-          borderTop: "1px solid var(--border-subtle)",
-          flexShrink: 0,
-        }}
-      >
+      <div style={{ padding: "8px 8px", borderTop: "1px solid var(--border-subtle)", flexShrink: 0 }}>
         <button
           onClick={openSettings}
           style={{
@@ -208,6 +297,10 @@ export function Sidebar() {
           Settings
         </button>
       </div>
+
+      <style>{`
+        .sidebar-nav-item:hover .today-add-btn { opacity: 1 !important; }
+      `}</style>
     </aside>
   );
 }
