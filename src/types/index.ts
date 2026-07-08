@@ -2,6 +2,8 @@ export type NodeType = "area" | "project" | "task" | "subtask";
 
 export type ReminderOption = "none" | "today" | "tomorrow" | "custom";
 
+export type RepeatOption = "none" | "daily" | "weekly" | "monthly";
+
 export type View = "life" | "today" | "upcoming" | "completed" | "archive";
 
 export interface LifeNode {
@@ -14,6 +16,8 @@ export interface LifeNode {
   collapsed: boolean;
   archived: boolean;
   reminder: ReminderOption;
+  repeat: RepeatOption;
+  lastCompletedAt: number | null;
   dueDate: string | null;
   notes: string;
   icon: string | null;

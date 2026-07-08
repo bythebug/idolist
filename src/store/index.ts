@@ -5,7 +5,7 @@ import { nanoid } from "nanoid";
 
 // Immer requires this to support Set and Map mutations in producers
 enableMapSet();
-import type { LifeNode, View, DragState } from "@/types";
+import type { LifeNode, View, DragState, RepeatOption } from "@/types";
 import { getSubtree } from "@/lib/tree";
 import {
   loadState,
@@ -81,6 +81,7 @@ interface StoreActions {
   addToToday: (id: string) => void;
   removeFromToday: (id: string) => void;
   checkTodayReset: () => void;
+  checkRepeatingTasks: () => void;
 
   // Drag
   setDragState: (state: DragState | null) => void;
@@ -230,6 +231,8 @@ export const useStore = create<IdolistStore>()(
             collapsed: false,
             archived: false,
             reminder: "none",
+            repeat: "none",
+            lastCompletedAt: null,
             dueDate: null,
             notes: "",
             icon: null,
@@ -358,6 +361,7 @@ export const useStore = create<IdolistStore>()(
           const n = state.nodes[id];
           if (!n) return;
           n.completed = !n.completed;
+          n.lastCompletedAt = n.completed ? Date.now() : null;
           n.updatedAt = Date.now();
         });
 
@@ -596,6 +600,35 @@ export const useStore = create<IdolistStore>()(
             );
             completedIds.forEach((id) => state.todayIds.delete(id));
             state.lastResetDate = today;
+          }
+        });
+        debouncedSave(get);
+      },
+
+      checkRepeatingTasks: () => {
+        const now = new Date();
+        set((state) => {
+          for (const node of Object.values(state.nodes) as LifeNode[]) {
+            if (!node.completed || !node.repeat || node.repeat === "none" || !node.lastCompletedAt) continue;
+            const done = new Date(node.lastCompletedAt);
+            let reset = false;
+            if (node.repeat === "daily") {
+              reset = now.toDateString() !== done.toDateString();
+            } else if (node.repeat === "weekly") {
+              // Different ISO week: shift to Monday of each date's week and compare
+              const mondayOf = (d: Date) => {
+                const day = d.getDay() || 7;
+                return new Date(d.getFullYear(), d.getMonth(), d.getDate() - day + 1).toDateString();
+              };
+              reset = mondayOf(now) !== mondayOf(done);
+            } else if (node.repeat === "monthly") {
+              reset = now.getMonth() !== done.getMonth() || now.getFullYear() !== done.getFullYear();
+            }
+            if (reset) {
+              node.completed = false;
+              node.lastCompletedAt = null;
+              node.updatedAt = Date.now();
+            }
           }
         });
         debouncedSave(get);

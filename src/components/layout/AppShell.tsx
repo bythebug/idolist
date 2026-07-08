@@ -17,7 +17,7 @@ import { useKeyboard } from "@/hooks/useKeyboard";
 import { Toast } from "@/components/ui/Toast";
 
 export function AppShell() {
-  const { view, darkMode, commandPaletteOpen, shortcutsOpen, settingsOpen, checkTodayReset, closeSettings } =
+  const { view, darkMode, commandPaletteOpen, shortcutsOpen, settingsOpen, checkTodayReset, checkRepeatingTasks, closeSettings } =
     useStore(useShallow((s) => ({
       view: s.view,
       darkMode: s.darkMode,
@@ -25,12 +25,14 @@ export function AppShell() {
       shortcutsOpen: s.shortcutsOpen,
       settingsOpen: s.settingsOpen,
       checkTodayReset: s.checkTodayReset,
+      checkRepeatingTasks: s.checkRepeatingTasks,
       closeSettings: s.closeSettings,
     })));
 
   useEffect(() => {
     checkTodayReset();
-  }, [checkTodayReset]);
+    checkRepeatingTasks();
+  }, [checkTodayReset, checkRepeatingTasks]);
 
   useEffect(() => {
     document.documentElement.setAttribute(

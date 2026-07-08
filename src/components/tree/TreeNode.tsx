@@ -347,17 +347,18 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
           paddingRight: 8,
         }}
       >
-        {node.dueDate && (
-          <span
-            style={{
-              fontSize: 11,
-              color: "var(--text-muted)",
-              whiteSpace: "nowrap",
-            }}
-          >
+        {node.dueDate ? (
+          <span style={{ fontSize: 11, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
             {format(new Date(node.dueDate), "MMM d")}
           </span>
-        )}
+        ) : node.repeat && node.repeat !== "none" ? (
+          <span
+            title={`Repeats ${node.repeat}`}
+            style={{ fontSize: 12, color: "var(--accent)", opacity: 0.7 }}
+          >
+            ↺
+          </span>
+        ) : null}
       </div>
     </div>
   );

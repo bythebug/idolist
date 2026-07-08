@@ -7,7 +7,7 @@ import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
 import { selectBreadcrumb } from "@/store/selectors";
 import { TreeNodeIcon } from "@/components/tree/TreeNodeIcon";
-import type { ReminderOption } from "@/types";
+import type { ReminderOption, RepeatOption } from "@/types";
 
 interface Props {
   id: string;
@@ -18,6 +18,13 @@ const REMINDER_OPTIONS: { value: ReminderOption; label: string }[] = [
   { value: "today", label: "Today" },
   { value: "tomorrow", label: "Tomorrow" },
   { value: "custom", label: "Custom" },
+];
+
+const REPEAT_OPTIONS: { value: RepeatOption; label: string; icon: string }[] = [
+  { value: "none",    label: "None",    icon: "—" },
+  { value: "daily",   label: "Daily",   icon: "↺" },
+  { value: "weekly",  label: "Weekly",  icon: "↺" },
+  { value: "monthly", label: "Monthly", icon: "↺" },
 ];
 
 export function NodeDetails({ id }: Props) {
@@ -224,6 +231,59 @@ export function NodeDetails({ id }: Props) {
             ))}
           </div>
         </div>
+
+        {/* Repeat */}
+        {node.type !== "area" && (
+          <div style={{ marginBottom: 16 }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: 11,
+                fontWeight: 600,
+                color: "var(--text-muted)",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                marginBottom: 6,
+              }}
+            >
+              Repeat
+            </label>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {REPEAT_OPTIONS.map((opt) => {
+                const active = (node.repeat ?? "none") === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => updateNode(id, { repeat: opt.value })}
+                    style={{
+                      padding: "5px 10px",
+                      fontSize: 12,
+                      fontFamily: "inherit",
+                      background: active ? "var(--accent)" : "var(--bg-sidebar)",
+                      color: active ? "white" : "var(--text-secondary)",
+                      border: `1px solid ${active ? "var(--accent)" : "var(--border)"}`,
+                      borderRadius: 6,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    {opt.value !== "none" && (
+                      <span style={{ fontSize: 11, opacity: 0.8 }}>↺</span>
+                    )}
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+            {(node.repeat ?? "none") !== "none" && node.lastCompletedAt && (
+              <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "6px 0 0" }}>
+                Last completed {format(new Date(node.lastCompletedAt), "MMM d 'at' h:mm a")}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Notes */}
         <div style={{ marginBottom: 16 }}>

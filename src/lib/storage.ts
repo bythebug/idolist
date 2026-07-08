@@ -21,6 +21,11 @@ export function loadState(): PersistedState {
     if (!raw) return defaultState();
     const parsed = JSON.parse(raw) as PersistedState;
     if (parsed.schemaVersion !== SCHEMA_VERSION) return defaultState();
+    // Patch nodes added before the repeat feature existed
+    for (const node of Object.values(parsed.nodes)) {
+      if (node.repeat === undefined) node.repeat = "none";
+      if (node.lastCompletedAt === undefined) node.lastCompletedAt = null;
+    }
     return parsed;
   } catch {
     return defaultState();

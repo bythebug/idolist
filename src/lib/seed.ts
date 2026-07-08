@@ -24,6 +24,8 @@ function makeNode(
     collapsed: false,
     archived: false,
     reminder: "none",
+    repeat: "none",
+    lastCompletedAt: null,
     dueDate: null,
     notes: "",
     icon,
