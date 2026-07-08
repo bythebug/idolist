@@ -82,22 +82,15 @@ export function InboxView() {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       {/* Header */}
-      <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid var(--border-subtle)", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", margin: 0, letterSpacing: "-0.02em" }}>
-            📥 Inbox
-          </h1>
-          {pending.length > 0 && (
-            <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{pending.length} items</span>
-          )}
-        </div>
-        <p style={{ fontSize: 13, color: "var(--text-muted)", margin: "4px 0 0" }}>
-          Capture anything. Organise later.
+      <div style={{ padding: "10px 16px", borderBottom: "1px solid var(--border-subtle)", flexShrink: 0 }}>
+        <h1 style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>Inbox</h1>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
+          {pending.length > 0 ? `${pending.length} items · ` : ""}Capture anything, organise later
         </p>
       </div>
 
       {/* Quick-add with NLP */}
-      <div style={{ padding: "14px 24px", borderBottom: "1px solid var(--border-subtle)", flexShrink: 0 }}>
+      <div style={{ padding: "10px 16px", borderBottom: "1px solid var(--border-subtle)", flexShrink: 0 }}>
         <div
           style={{
             display: "flex",
@@ -176,7 +169,7 @@ export function InboxView() {
       </div>
 
       {/* Items list */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "8px 24px 24px" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "8px 16px 24px" }}>
         {items.length === 0 ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: 200, gap: 8, color: "var(--text-muted)" }}>
             <Check size={32} strokeWidth={1.5} />

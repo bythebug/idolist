@@ -243,44 +243,33 @@ export function LifeTree() {
         {/* Tree toolbar */}
         <div
           style={{
-            padding: "14px 16px 10px",
+            padding: "10px 16px",
             borderBottom: "1px solid var(--border-subtle)",
             flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 8,
           }}
         >
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
-            <div style={{ minWidth: 0 }}>
-              <h1
-                style={{
-                  fontSize: 18,
-                  fontWeight: 700,
-                  color: "var(--text-primary)",
-                  margin: 0,
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1.2,
-                }}
-              >
-                Life
-              </h1>
-            </div>
+          <h1 style={viewHeadingStyle}>Life</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
             <button
               onClick={handleAddRoot}
               title="Add area (root node)"
               aria-label="Add root node"
               style={{
-                flexShrink: 0,
                 display: "flex",
                 alignItems: "center",
                 gap: 4,
-                padding: "4px 10px",
+                padding: "3px 9px",
                 background: "transparent",
                 border: "1px solid var(--border)",
-                borderRadius: 6,
+                borderRadius: "var(--radius-sm)",
                 cursor: "pointer",
                 fontSize: 12,
                 color: "var(--text-secondary)",
                 fontFamily: "inherit",
-                marginTop: 2,
               }}
             >
               <Plus size={12} />
@@ -490,3 +479,10 @@ export function LifeTree() {
     </DndContext>
   );
 }
+
+const viewHeadingStyle: React.CSSProperties = {
+  fontSize: 15,
+  fontWeight: 600,
+  color: "var(--text-primary)",
+  margin: 0,
+};

@@ -22,23 +22,12 @@ export function TodayView() {
       {/* Header */}
       <div
         style={{
-          padding: "12px 16px 12px",
+          padding: "10px 16px",
           borderBottom: "1px solid var(--border-subtle)",
           flexShrink: 0,
         }}
       >
-        <h1
-          style={{
-            fontSize: 13,
-            fontWeight: 600,
-            color: "var(--text-secondary)",
-            margin: 0,
-            letterSpacing: "0.05em",
-            textTransform: "uppercase",
-          }}
-        >
-          Today
-        </h1>
+        <h1 style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>Today</h1>
         <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
           {format(new Date(), "EEEE, MMMM d")}
           {total > 0 && ` · ${completed} of ${total} done`}
