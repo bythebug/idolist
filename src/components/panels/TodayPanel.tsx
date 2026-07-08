@@ -8,7 +8,7 @@ import { useShallow } from "zustand/react/shallow";
 import { selectTodayNodes } from "@/store/selectors";
 import { TreeNodeCheckbox } from "@/components/tree/TreeNodeCheckbox";
 
-export function TodayPanel() {
+export function TodayPanel({ fillHeight = false }: { fillHeight?: boolean }) {
   const {
     nodes,
     todayIds,
@@ -37,7 +37,9 @@ export function TodayPanel() {
       style={{
         display: "flex",
         flexDirection: "column",
-        borderBottom: "1px solid var(--border-subtle)",
+        flex: fillHeight ? 1 : undefined,
+        overflow: fillHeight ? "hidden" : undefined,
+        borderBottom: fillHeight ? "none" : "1px solid var(--border-subtle)",
       }}
     >
       {/* Header */}
@@ -82,7 +84,7 @@ export function TodayPanel() {
       </div>
 
       {/* Task list */}
-      <div style={{ maxHeight: 220, overflowY: "auto" }}>
+      <div style={{ flex: fillHeight ? 1 : undefined, maxHeight: fillHeight ? undefined : 220, overflowY: "auto" }}>
         {todayNodes.length === 0 ? (
           <div
             style={{

@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import {
   Home,
   Sun,
@@ -15,14 +14,8 @@ import {
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
 import { selectTodayCount, selectUpcomingCount } from "@/store/selectors";
-import { getSubtreeCompletionRatio } from "@/lib/tree";
+import { LifeProgressPanel } from "@/components/panels/LifeProgressPanel";
 import type { View } from "@/types";
-
-// Stable area colors — must match LifeProgressPanel
-const AREA_COLORS = [
-  "#5B8CF5", "#10B981", "#8B5CF6", "#F59E0B",
-  "#EC4899", "#06B6D4", "#EF4444", "#84CC16",
-];
 
 const NAV_ITEMS: { id: View | "inbox" | "graph" | "calendar" | "notes"; label: string; icon: React.ComponentType<{ size?: number }>; view?: View }[] = [
   { id: "life",     label: "Life",     icon: Home,       view: "life" },
@@ -36,11 +29,10 @@ const NAV_ITEMS: { id: View | "inbox" | "graph" | "calendar" | "notes"; label: s
 ];
 
 export function Sidebar() {
-  const { view, nodes, rootIds, todayIds, setView, openCommandPalette, openSettings } = useStore(
+  const { view, nodes, todayIds, setView, openCommandPalette, openSettings } = useStore(
     useShallow((s) => ({
       view: s.view,
       nodes: s.nodes,
-      rootIds: s.rootIds,
       todayIds: s.todayIds,
       setView: s.setView,
       openCommandPalette: s.openCommandPalette,
@@ -50,24 +42,6 @@ export function Sidebar() {
 
   const todayCount = selectTodayCount(nodes, todayIds);
   const upcomingCount = selectUpcomingCount(nodes);
-
-  const areas = useMemo(
-    () =>
-      rootIds
-        .map((id, i) => {
-          const node = nodes[id];
-          if (!node || node.archived) return null;
-          return {
-            id,
-            title: node.title,
-            icon: node.icon,
-            color: AREA_COLORS[i % AREA_COLORS.length],
-            ratio: getSubtreeCompletionRatio(nodes, id),
-          };
-        })
-        .filter(Boolean) as { id: string; title: string; icon: string | null; color: string; ratio: number }[],
-    [nodes, rootIds]
-  );
 
   return (
     <aside
@@ -114,7 +88,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav style={{ flex: 1, padding: "6px 8px", overflow: "auto" }}>
+      <nav style={{ padding: "6px 8px", flexShrink: 0 }}>
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = item.view ? view === item.view : false;
@@ -175,65 +149,18 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Life areas */}
-      {areas.length > 0 && (
-        <div
-          style={{
-            padding: "10px 14px",
-            borderTop: "1px solid var(--border-subtle)",
-            flexShrink: 0,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 10,
-              fontWeight: 600,
-              color: "var(--text-muted)",
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-              marginBottom: 8,
-            }}
-          >
-            Areas
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-            {areas.map((area) => (
-              <div
-                key={area.id}
-                style={{ display: "flex", alignItems: "center", gap: 8 }}
-                onClick={() => setView("life")}
-              >
-                <span
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: 2,
-                    background: area.color,
-                    flexShrink: 0,
-                    display: "inline-block",
-                  }}
-                />
-                <span
-                  style={{
-                    flex: 1,
-                    fontSize: 12,
-                    color: "var(--text-secondary)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    cursor: "pointer",
-                  }}
-                >
-                  {area.icon ? `${area.icon} ` : ""}{area.title}
-                </span>
-                <span style={{ fontSize: 10, color: "var(--text-muted)", flexShrink: 0 }}>
-                  {Math.round(area.ratio * 100)}%
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Life Progress — fills remaining space */}
+      <div
+        style={{
+          flex: 1,
+          overflow: "hidden",
+          borderTop: "1px solid var(--border-subtle)",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <LifeProgressPanel />
+      </div>
 
       {/* Settings */}
       <div
