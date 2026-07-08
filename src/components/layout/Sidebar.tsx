@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import {
   Home,
   Sun,
+  Clock,
   Inbox,
   Search,
   GitBranch,
@@ -13,7 +14,7 @@ import {
 } from "lucide-react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
-import { selectTodayCount } from "@/store/selectors";
+import { selectTodayCount, selectUpcomingCount } from "@/store/selectors";
 import { getSubtreeCompletionRatio } from "@/lib/tree";
 import type { View } from "@/types";
 
@@ -26,6 +27,7 @@ const AREA_COLORS = [
 const NAV_ITEMS: { id: View | "inbox" | "graph" | "calendar" | "notes"; label: string; icon: React.ComponentType<{ size?: number }>; view?: View }[] = [
   { id: "life",     label: "Life",     icon: Home,       view: "life" },
   { id: "today",    label: "Today",    icon: Sun,        view: "today" },
+  { id: "upcoming", label: "Upcoming", icon: Clock,      view: "upcoming" },
   { id: "inbox",    label: "Inbox",    icon: Inbox },
   { id: "search",   label: "Search",   icon: Search },
   { id: "graph",    label: "Graph",    icon: GitBranch },
@@ -47,6 +49,7 @@ export function Sidebar() {
   );
 
   const todayCount = selectTodayCount(nodes, todayIds);
+  const upcomingCount = selectUpcomingCount(nodes);
 
   const areas = useMemo(
     () =>
@@ -116,7 +119,7 @@ export function Sidebar() {
           const Icon = item.icon;
           const isActive = item.view ? view === item.view : false;
           const isAvailable = !!item.view;
-          const badge = item.id === "today" ? todayCount : 0;
+          const badge = item.id === "today" ? todayCount : item.id === "upcoming" ? upcomingCount : 0;
 
           return (
             <button

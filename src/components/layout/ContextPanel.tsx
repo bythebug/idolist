@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useStore } from "@/store";
 import { NodeDetails } from "@/components/panels/NodeDetails";
 import { TodayPanel } from "@/components/panels/TodayPanel";
-import { UpcomingPanel } from "@/components/panels/UpcomingPanel";
 import { LifeProgressPanel } from "@/components/panels/LifeProgressPanel";
 
 export function ContextPanel() {
@@ -22,9 +21,8 @@ export function ContextPanel() {
         position: "relative",
       }}
     >
-      {/* Always-visible: Today list + Upcoming + Life Progress */}
+      {/* Always-visible: Today list + Life Progress */}
       <TodayPanel />
-      <UpcomingPanel />
       <LifeProgressPanel />
 
       {/* NodeDetails slides in when a node is selected */}
