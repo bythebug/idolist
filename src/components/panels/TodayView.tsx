@@ -25,6 +25,10 @@ export function TodayView() {
   );
 
   const todayNodes = selectTodayNodes(nodes, todayIds);
+  const completed = todayNodes.filter((n) => n.completed).length;
+  const total = todayNodes.length;
+  const progress = total > 0 ? completed / total : 0;
+
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const parsed = useMemo(() => parseTask(draft), [draft]);
@@ -102,8 +106,37 @@ export function TodayView() {
           Today
         </h1>
         <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
-          {format(new Date(), "EEEE, MMMM d")} · {todayNodes.length} tasks
+          {format(new Date(), "EEEE, MMMM d")}
+          {total > 0 && ` · ${completed} of ${total} done`}
         </p>
+
+        {/* Progress bar — only shown when there are tasks */}
+        {total > 0 && (
+          <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 8 }}>
+            <div
+              style={{
+                flex: 1,
+                height: 3,
+                background: "var(--bg-node-hover)",
+                borderRadius: 99,
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  width: `${progress * 100}%`,
+                  background: progress === 1 ? "var(--success)" : "var(--accent)",
+                  borderRadius: 99,
+                  transition: "width 400ms ease, background 300ms ease",
+                }}
+              />
+            </div>
+            <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0, minWidth: 28, textAlign: "right" }}>
+              {Math.round(progress * 100)}%
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Quick-add row */}
