@@ -43,6 +43,7 @@ interface StoreActions {
   outdentNode: (id: string) => void;
   collapseAll: () => void;
   expandAll: () => void;
+  archiveNode: (id: string) => void;
 
   // UI
   setSelected: (id: string | null) => void;
@@ -405,6 +406,22 @@ export const useStore = create<LifeOSStore>()(
     expandAll: () => {
       set((state) => {
         state.collapsedIds.clear();
+      });
+      debouncedSave(get);
+    },
+
+    archiveNode: (id) => {
+      set((state) => {
+        const subtree = getSubtree(state.nodes as Record<string, LifeNode>, id);
+        for (const sid of subtree) {
+          if (state.nodes[sid]) state.nodes[sid].archived = true;
+        }
+        if (state.selectedId && subtree.includes(state.selectedId)) {
+          state.selectedId = null;
+        }
+        if (state.focusedId && subtree.includes(state.focusedId)) {
+          state.focusedId = null;
+        }
       });
       debouncedSave(get);
     },

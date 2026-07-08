@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useCallback } from "react";
-import { ChevronRight, Plus, MoreHorizontal, GripVertical } from "lucide-react";
+import { ChevronRight, Plus, GripVertical, Archive } from "lucide-react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
@@ -28,6 +28,7 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
     toggleComplete,
     toggleCollapsed,
     addNode,
+    archiveNode,
   } = useStore(useShallow((s) => ({
     node: s.nodes[id],
     isSelected: s.selectedId === id,
@@ -40,6 +41,7 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
     toggleComplete: s.toggleComplete,
     toggleCollapsed: s.toggleCollapsed,
     addNode: s.addNode,
+    archiveNode: s.archiveNode,
   })));
 
   const draggable = useDraggable({ id });
@@ -221,8 +223,9 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
           <Plus size={13} />
         </button>
         <button
-          title="More options"
-          aria-label="More options"
+          onClick={(e) => { e.stopPropagation(); archiveNode(id); }}
+          title="Archive"
+          aria-label="Archive node"
           style={{
             width: 22,
             height: 22,
@@ -237,7 +240,7 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
             padding: 0,
           }}
         >
-          <MoreHorizontal size={13} />
+          <Archive size={13} />
         </button>
       </div>
     </div>
