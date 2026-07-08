@@ -2,28 +2,33 @@
 
 import { useState, useRef, useMemo } from "react";
 import { format } from "date-fns";
-import { Plus, Check, Trash2, ArrowRight } from "lucide-react";
+import { Plus, Check, Trash2, ArrowRight, Calendar } from "lucide-react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
 import { INBOX_ID } from "@/types";
 import type { LifeNode } from "@/types";
 import { TreeNodeCheckbox } from "@/components/tree/TreeNodeCheckbox";
+import { parseTask } from "@/lib/nlp";
 
 export function InboxView() {
-  const { nodes, rootIds, addToInbox, toggleComplete, deleteNode, moveNode, setSelected, setView } =
+  const { nodes, rootIds, addToInbox, addToToday, updateNode, toggleComplete, deleteNode, moveNode, setSelected } =
     useStore(useShallow((s) => ({
       nodes: s.nodes,
       rootIds: s.rootIds,
       addToInbox: s.addToInbox,
+      addToToday: s.addToToday,
+      updateNode: s.updateNode,
       toggleComplete: s.toggleComplete,
       deleteNode: s.deleteNode,
       moveNode: s.moveNode,
       setSelected: s.setSelected,
-      setView: s.setView,
     })));
 
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Live NLP parse as user types
+  const parsed = useMemo(() => parseTask(draft), [draft]);
 
   const inbox = nodes[INBOX_ID];
   const items = useMemo(
@@ -37,9 +42,11 @@ export function InboxView() {
   );
 
   function submit() {
-    const t = draft.trim();
-    if (!t) return;
-    addToInbox(t);
+    if (!draft.trim()) return;
+    const id = addToInbox(parsed.title);
+    if (parsed.dueDate) updateNode(id, { dueDate: parsed.dueDate });
+    if (parsed.reminder !== "none") updateNode(id, { reminder: parsed.reminder });
+    if (parsed.isToday) addToToday(id);
     setDraft("");
     inputRef.current?.focus();
   }
@@ -61,13 +68,7 @@ export function InboxView() {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       {/* Header */}
-      <div
-        style={{
-          padding: "20px 24px 16px",
-          borderBottom: "1px solid var(--border-subtle)",
-          flexShrink: 0,
-        }}
-      >
+      <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid var(--border-subtle)", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", margin: 0, letterSpacing: "-0.02em" }}>
             📥 Inbox
@@ -81,14 +82,8 @@ export function InboxView() {
         </p>
       </div>
 
-      {/* Quick-add input */}
-      <div
-        style={{
-          padding: "14px 24px",
-          borderBottom: "1px solid var(--border-subtle)",
-          flexShrink: 0,
-        }}
-      >
+      {/* Quick-add with NLP */}
+      <div style={{ padding: "14px 24px", borderBottom: "1px solid var(--border-subtle)", flexShrink: 0 }}>
         <div
           style={{
             display: "flex",
@@ -106,7 +101,7 @@ export function InboxView() {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Capture a thought, task, idea…"
+            placeholder="e.g. Call John tomorrow, Review doc by Friday…"
             style={{
               flex: 1,
               border: "none",
@@ -136,28 +131,45 @@ export function InboxView() {
             </button>
           )}
         </div>
+
+        {/* NLP preview chip */}
+        {draft.trim() && parsed.dateLabel && (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, paddingLeft: 2 }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                padding: "3px 9px",
+                background: "var(--accent-subtle)",
+                border: "1px solid var(--accent)",
+                borderRadius: 99,
+                fontSize: 12,
+                color: "var(--accent)",
+                fontWeight: 500,
+              }}
+            >
+              <Calendar size={11} />
+              {parsed.dateLabel}
+            </div>
+            {parsed.title !== draft.trim() && (
+              <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                → &ldquo;{parsed.title}&rdquo;
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Items list */}
       <div style={{ flex: 1, overflowY: "auto", padding: "8px 24px 24px" }}>
         {items.length === 0 ? (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              height: 200,
-              gap: 8,
-              color: "var(--text-muted)",
-            }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: 200, gap: 8, color: "var(--text-muted)" }}>
             <Check size={32} strokeWidth={1.5} />
             <span style={{ fontSize: 14 }}>Inbox is empty</span>
           </div>
         ) : (
           <>
-            {/* Pending items */}
             {pending.map((node) => (
               <InboxItem
                 key={node.id}
@@ -170,19 +182,9 @@ export function InboxView() {
               />
             ))}
 
-            {/* Completed items */}
             {done.length > 0 && (
               <>
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: "var(--text-muted)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.06em",
-                    margin: "16px 0 6px",
-                  }}
-                >
+                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "16px 0 6px" }}>
                   Completed
                 </div>
                 {done.map((node) => (
@@ -224,15 +226,7 @@ function InboxItem({
 
   return (
     <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        padding: "8px 10px",
-        borderRadius: 8,
-        marginBottom: 2,
-        position: "relative",
-      }}
+      style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 8, marginBottom: 2, position: "relative" }}
       onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--bg-node-hover)"; }}
       onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; setShowMove(false); }}
     >
@@ -254,40 +248,24 @@ function InboxItem({
           {node.title || "Untitled"}
         </div>
         {node.notes && (
-          <div
-            style={{
-              fontSize: 12,
-              color: "var(--text-muted)",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              marginTop: 1,
-            }}
-          >
+          <div style={{ fontSize: 12, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1 }}>
             {node.notes}
           </div>
         )}
       </div>
 
-      {node.createdAt && (
-        <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>
-          {format(new Date(node.createdAt), "MMM d")}
-        </span>
-      )}
+      {/* Due date or creation date */}
+      <span style={{ fontSize: 11, color: node.dueDate ? "var(--accent)" : "var(--text-muted)", flexShrink: 0 }}>
+        {node.dueDate
+          ? format(new Date(node.dueDate), "MMM d")
+          : format(new Date(node.createdAt), "MMM d")}
+      </span>
 
-      {/* Action buttons — visible on hover */}
-      <div
-        className="inbox-actions"
-        style={{ display: "flex", gap: 4, flexShrink: 0 }}
-        onClick={(e) => e.stopPropagation()}
-      >
+      {/* Hover actions */}
+      <div style={{ display: "flex", gap: 4, flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
         {areas.length > 0 && (
           <div style={{ position: "relative" }}>
-            <button
-              onClick={() => setShowMove((v) => !v)}
-              title="Move to area"
-              style={iconBtnStyle}
-            >
+            <button onClick={() => setShowMove((v) => !v)} title="Move to area" style={iconBtnStyle}>
               <ArrowRight size={13} />
             </button>
             {showMove && (
@@ -313,34 +291,19 @@ function InboxItem({
                   <button
                     key={area.id}
                     onClick={() => { onMoveTo(area.id); setShowMove(false); }}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      width: "100%",
-                      padding: "7px 12px",
-                      background: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: 13,
-                      color: "var(--text-primary)",
-                      fontFamily: "inherit",
-                      textAlign: "left",
-                    }}
+                    style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "7px 12px", background: "transparent", border: "none", cursor: "pointer", fontSize: 13, color: "var(--text-primary)", fontFamily: "inherit", textAlign: "left" }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--bg-node-hover)"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                   >
                     {area.icon && <span>{area.icon}</span>}
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {area.title}
-                    </span>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{area.title}</span>
                   </button>
                 ))}
               </div>
             )}
           </div>
         )}
-        <button onClick={onDelete} title="Delete" style={{ ...iconBtnStyle, color: "var(--text-muted)" }}>
+        <button onClick={onDelete} title="Delete" style={iconBtnStyle}>
           <Trash2 size={13} />
         </button>
       </div>
