@@ -2,6 +2,8 @@
 
 import { useStore } from "@/store";
 import { NodeDetails } from "@/components/panels/NodeDetails";
+import { TodayPanel } from "@/components/panels/TodayPanel";
+import { LifeProgressPanel } from "@/components/panels/LifeProgressPanel";
 
 export function ContextPanel() {
   const selectedId = useStore((s) => s.selectedId);
@@ -15,24 +17,27 @@ export function ContextPanel() {
         flexDirection: "column",
         height: "100%",
         overflow: "hidden",
+        position: "relative",
       }}
     >
-      {selectedId ? (
-        <NodeDetails id={selectedId} />
-      ) : (
+      {/* Always-visible: Today list + Life Progress */}
+      <TodayPanel />
+      <LifeProgressPanel />
+
+      {/* NodeDetails slides in over the top when a node is selected */}
+      {selectedId && (
         <div
           style={{
-            flex: 1,
+            position: "absolute",
+            inset: 0,
+            background: "var(--bg-panel)",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "var(--text-muted)",
-            fontSize: 13,
-            padding: 24,
-            textAlign: "center",
+            flexDirection: "column",
+            zIndex: 10,
+            borderLeft: "1px solid var(--border)",
           }}
         >
-          Select a node to see details
+          <NodeDetails id={selectedId} />
         </div>
       )}
     </aside>
