@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+/* ─── Design Tokens ─────────────────────────────────────────── */
+:root {
+  /* Surfaces */
+  --bg-app:              #FAFAF9;
+  --bg-sidebar:          #F5F4F2;
+  --bg-panel:            #FAFAF9;
+
+  /* Node states */
+  --bg-node-hover:       rgba(0, 0, 0, 0.03);
+  --bg-node-selected:    rgba(0, 0, 0, 0.055);
+
+  /* Text */
+  --text-primary:        #1A1A1A;
+  --text-secondary:      #6B7280;
+  --text-muted:          #9CA3AF;
+  --text-placeholder:    #C4C7CC;
+  --text-completed:      #B0B6BF;
+
+  /* Borders */
+  --border:              #E8E8E6;
+  --border-subtle:       rgba(0, 0, 0, 0.06);
+  --border-focus:        rgba(91, 140, 245, 0.5);
+
+  /* Accent */
+  --accent:              #5B8CF5;
+  --accent-hover:        #4A7AE8;
+  --accent-subtle:       rgba(91, 140, 245, 0.1);
+
+  /* Semantic */
+  --success:             #10B981;
+  --success-subtle:      rgba(16, 185, 129, 0.1);
+  --warning:             #F59E0B;
+  --danger:              #EF4444;
+
+  /* Radius */
+  --radius-sm:           6px;
+  --radius:              10px;
+  --radius-lg:           14px;
+
+  /* Shadows */
+  --shadow-sm:           0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow:              0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-lg:           0 8px 24px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-overlay:      0 16px 48px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
+
+  /* Layout */
+  --sidebar-width:       240px;
+  --panel-width:         320px;
+}
+
+[data-theme="dark"] {
+  --bg-app:              #141414;
+  --bg-sidebar:          #111111;
+  --bg-panel:            #141414;
+
+  --bg-node-hover:       rgba(255, 255, 255, 0.04);
+  --bg-node-selected:    rgba(255, 255, 255, 0.07);
+
+  --text-primary:        #E8E8E6;
+  --text-secondary:      #8B919A;
+  --text-muted:          #6B7280;
+  --text-placeholder:    #4B5563;
+  --text-completed:      #4B5563;
+
+  --border:              #252525;
+  --border-subtle:       rgba(255, 255, 255, 0.06);
+  --border-focus:        rgba(91, 140, 245, 0.4);
+
+  --shadow-sm:           0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow:              0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-lg:           0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-overlay:      0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* ─── Tailwind theme mapping ─────────────────────────────────── */
+@theme inline {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* ─── Base ───────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ─── Focus ─────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--accent-subtle);
+  color: var(--text-primary);
+}

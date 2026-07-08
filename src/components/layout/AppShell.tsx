@@ -1,0 +1,67 @@
+"use client";
+
+import { useEffect } from "react";
+import { useStore } from "@/store";
+import { Sidebar } from "./Sidebar";
+import { ContextPanel } from "./ContextPanel";
+import { LifeTree } from "@/components/tree/LifeTree";
+import { TodayView } from "@/components/panels/TodayView";
+import { CommandPalette } from "@/components/overlays/CommandPalette";
+import { ShortcutsModal } from "@/components/overlays/ShortcutsModal";
+import { useKeyboard } from "@/hooks/useKeyboard";
+
+export function AppShell() {
+  const { view, darkMode, commandPaletteOpen, shortcutsOpen, checkTodayReset } =
+    useStore((s) => ({
+      view: s.view,
+      darkMode: s.darkMode,
+      commandPaletteOpen: s.commandPaletteOpen,
+      shortcutsOpen: s.shortcutsOpen,
+      checkTodayReset: s.checkTodayReset,
+    }));
+
+  useEffect(() => {
+    checkTodayReset();
+  }, [checkTodayReset]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute(
+      "data-theme",
+      darkMode ? "dark" : "light"
+    );
+  }, [darkMode]);
+
+  useKeyboard();
+
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns:
+          "var(--sidebar-width) 1fr var(--panel-width)",
+        height: "100vh",
+        overflow: "hidden",
+        background: "var(--bg-app)",
+      }}
+    >
+      <Sidebar />
+
+      <main
+        style={{
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          background: "var(--bg-app)",
+        }}
+      >
+        {view === "life" && <LifeTree />}
+        {view === "today" && <TodayView />}
+      </main>
+
+      <ContextPanel />
+
+      {commandPaletteOpen && <CommandPalette />}
+      {shortcutsOpen && <ShortcutsModal />}
+    </div>
+  );
+}
