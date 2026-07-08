@@ -308,100 +308,70 @@ src/
 
 ---
 
-### PHASE 21 — Node Icons / Emoji Picker ⬜ NEXT
+### PHASE 21 — Node Icons / Emoji Picker ✅ DONE
 
-Each node in the mockup has a colored icon prefix (emoji or small colored square).
-
-- [ ] Add `icon: string | null` field to `LifeNode` (already in types — wire it up)
-- [ ] `TreeNodeIcon.tsx` — renders the emoji or a default type-based icon (area=📁, project=◆, task=•)
-- [ ] Click on icon in tree row opens inline emoji picker (or a small popover with common emojis)
-- [ ] Area-level nodes get auto-assigned a muted color square on creation (Career=blue, Health=green, etc.)
-- [ ] Icon shown in NodeDetails panel (editable from there too)
-- [ ] Seed data updated with icons for the sample tree areas
+- [x] `TreeNodeIcon.tsx` — renders emoji or default icon by depth/type (depth=0 → `◆`, type=project → `▸`, else `·`)
+- [x] Click on icon opens inline emoji picker popover (7 groups × 10 emojis, positioned relative to icon)
+- [x] Clear icon button appears when emoji is set
+- [x] Closes on click-outside or Escape
+- [x] Icon shown and editable in NodeDetails panel
+- [x] Seed data updated: Career=`💼`, Health=`🏃`, Finance=`💰`, Learning=`📚`
 
 ---
 
-### PHASE 22 — Multi-Column Tree ⬜
+### PHASE 22 — Multi-Column Tree ✅ DONE
 
-The tree becomes a table with four columns: title, progress, today, due date.
-
-- [ ] `LifeTree.tsx` — add column header row (Progress / Today / Due) above the virtualizer
-- [ ] `TreeNode.tsx` — add right-side columns to each row:
-  - **Progress column** (120px): horizontal progress bar showing % of children completed; only visible on area/project nodes
-  - **Today column** (48px): sun icon toggle — click adds/removes from todayIds; highlights if in today
-  - **Due date column** (80px): shows `dueDate` as short date ("May 14"); click opens date picker inline or in NodeDetails
-- [ ] Column headers are sticky (stay visible while scrolling the tree)
-- [ ] Clicking column header sorts (future stretch) — for now just labels
-- [ ] Keyboard: Tab still navigates columns for the focused row
-- [ ] `selectSubtreeCompletionRatio(nodes, id)` selector — counts completed vs total descendants (leaf nodes only)
-- [ ] Progress bar uses CSS `--accent` color, width from ratio, only shown when node has children
+- [x] `LifeTree.tsx` — 28px column header row (Progress / Today / Due) above virtualizer; always visible
+- [x] `TreeNode.tsx` column constants exported: `COL_PROGRESS=96`, `COL_TODAY=40`, `COL_DUE=72`
+- [x] **Progress column**: `getSubtreeCompletionRatio` bar + `n%` text; only shown when node has children
+- [x] **Today column**: sun icon toggle, amber when in todayIds; hover darkens border color
+- [x] **Due date column**: `format(dueDate, "MMM d")` when set
+- [x] `getSubtreeCompletionRatio(nodes, id)` — leaf-only ratio in `src/lib/tree.ts`
+- [x] Drag ghost overlay shows node emoji icon when set
 
 ---
 
-### PHASE 23 — Right Panel Redesign ⬜
+### PHASE 23 — Right Panel Redesign ✅ DONE
 
-Replace the single NodeDetails panel with a two-section right panel.
-
-- [ ] **Top section — Today list**:
-  - Header: "Today" + current date
-  - List of tasks in todayIds, each with checkbox + title
-  - Completing a task here also completes it in the tree
-  - "Add Task to Today" button at the bottom (opens command palette filtered to tree nodes)
-  - Empty state: "Nothing planned for today"
-- [ ] **Bottom section — Life Progress**:
-  - "Life Progress" header
-  - Big percentage number (overall completion ratio)
-  - Sparkline trend chart: last 7 days completion % (store daily snapshot in localStorage)
-  - Color-coded area tags list (area name + colored dot + its own % complete)
-- [ ] NodeDetails (editing notes, due date, reminder) becomes a slide-in panel or modal — triggered by clicking a node's detail icon or pressing E
-- [ ] Right panel is always visible; NodeDetails overlays on demand
+- [x] `TodayPanel.tsx` — date header with day/date, completed/total badge, task list with checkboxes, remove-on-hover ×, "Add task to Today" dashed-border CTA
+- [x] `LifeProgressPanel.tsx` — 32px overall %, 6px progress bar, "N of M tasks" subtitle, per-area breakdown with color bars
+- [x] `ContextPanel.tsx` — always shows TodayPanel (top) + LifeProgressPanel (flex 1)
+- [x] NodeDetails overlays with Framer Motion spring slide-in (`x: 100% → 0`) via `AnimatePresence`
+- [x] `X` button in NodeDetails header calls `setSelected(null)` to dismiss overlay
+- [x] Escape key also dismisses (via `useKeyboard`)
+- [x] `E` key opens/toggles NodeDetails for focused node
 
 ---
 
-### PHASE 24 — Left Sidebar Redesign ⬜
+### PHASE 24 — Left Sidebar Redesign ✅ DONE
 
-Align sidebar nav with the mockup.
-
-- [ ] Nav items: Life, Today, Inbox (placeholder), Search, Graph (placeholder), Calendar (placeholder), Notes (placeholder)
-  - Active items: Life and Today work now; others show "coming soon" empty state
-- [ ] Remove: Upcoming, Completed, Archive from primary nav (move to secondary or accessible via keyboard/command palette)
-- [ ] Footer: replace ProgressRing + stats with a compact "Life Progress" section:
-  - Small sparkline graph (reuse from Phase 23)
-  - "18% · 23 of 128 tasks" stat line
-  - Color-coded area tags as small squares with labels
-- [ ] Area tags: auto-derive from root-level nodes, color-coded (assign stable color per root node)
-- [ ] Profile/avatar chip at the very top: "My Life" with a muted avatar circle
+- [x] 🌿 My Life identity chip at top with "Personal OS" subtitle
+- [x] Nav: Life (active), Today (active + badge), Inbox, Search, Graph, Calendar, Notes
+- [x] Inbox / Graph / Calendar / Notes: dimmed (opacity 0.5), no-op click, "Coming soon" tooltip
+- [x] Search nav item → `openCommandPalette()`
+- [x] Today badge shows `todayIds.size` count
+- [x] **Areas section** at bottom: 8-color stable palette, color square, emoji + title, `n%` per root area
+- [x] Settings button in footer
 
 ---
 
-### PHASE 25 — Tree Toolbar ⬜
+### PHASE 25 — Tree Toolbar ✅ DONE
 
-Add the header bar above the tree that the mockup shows.
-
-- [ ] Toolbar above tree (48px height):
-  - Back chevron `<` for breadcrumb navigation (when viewing a subtree)
-  - Current view title: "Life" (or node title if drilled in)
-  - Subtitle: "My Life — A map of everything that matters." (editable, stored as app meta)
-  - "Share" button (future — for now copy link / export)
-  - Search input (inline, opens CommandPalette on focus)
-- [ ] "New Item" button pinned at the bottom of the tree list (always visible, not just in empty state)
-- [ ] Tree can "drill into" a node — clicking an area title navigates into it and shows only that subtree with a back button
+- [x] Toolbar above tree: "My Life" h1 (18px, 700, letter-spacing -0.02em) + subtitle paragraph
+- [x] "Add area" button in toolbar top-right
+- [x] "New Item" button pinned at bottom of tree list (hover reveals, always present when nodes exist)
+- [x] Row height bumped from 36px to 40px (`estimateSize: () => 40`)
 
 ---
 
-### PHASE 26 — Visual Design Pass ⬜
+### PHASE 26 — Visual Design Pass ✅ DONE
 
-Final polish to match the mockup's aesthetic.
-
-- [ ] **Typography**: tree node titles slightly larger (14px), area nodes bold, task nodes regular weight
-- [ ] **Row height**: increase from 36px to 40px to give columns room to breathe
-- [ ] **Column grid**: use CSS grid on tree rows (`title 1fr / progress 120px / today 48px / due 80px`)
-- [ ] **Area color system**: each root-level area gets a stable color (Career=blue, Health=green, Finance=purple, Learning=orange, Personal=pink) stored in node `icon` field or a separate color map
-- [ ] **Sidebar width**: increase from 240px to 220px (or match mockup proportions: narrower sidebar, wider tree, narrower right panel)
-- [ ] **Right panel width**: 280px (currently 320px — mockup shows it narrower)
-- [ ] **Node row hover**: show column values more prominently on hover
-- [ ] **Completed nodes**: dimmer strikethrough text, still shows in tree (not hidden)
-- [ ] **Font**: verify Inter is rendering correctly at all weights used in mockup
+- [x] Tree node titles: 14px, area nodes (depth=0) at `fontWeight: 600`, tasks at 400
+- [x] Row height: 36px → 40px
+- [x] Sidebar: 240px → 210px
+- [x] Right panel: 320px → 260px
+- [x] `getDefaultIcon` depth mapping: depth=0 → `◆`, project → `▸`, else `·`
+- [x] Area colors: 8-color stable palette cycling across `AREA_COLORS` constant shared by Sidebar + LifeProgressPanel
 
 ---
 

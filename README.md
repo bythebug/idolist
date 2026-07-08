@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LifeOS
 
-## Getting Started
+A personal operating system built around a hierarchical life tree. Keyboard-first, premium feel, zero cloud dependency.
 
-First, run the development server:
+## What it is
+
+LifeOS is not a todo app. It's a tree-structured map of everything that matters — areas of your life (Career, Health, Finance, Learning…) broken down into projects and tasks, all in one view. Think Notion's structure with Linear's keyboard speed.
+
+## Features
+
+- **Hierarchical tree** — unlimited depth, drag-and-drop reordering, collapse/expand
+- **Multi-column layout** — inline progress bars, Today toggle, due date per row
+- **Keyboard-first** — full navigation without a mouse (arrow keys, Enter, Tab, Cmd+K, E, etc.)
+- **Today system** — mark any task for today (Cmd+T), dedicated today list in right panel
+- **Life Progress** — overall completion % and per-area breakdowns always visible
+- **Node icons** — emoji picker on every node, auto-icons by depth/type
+- **Command palette** — Cmd+K fuzzy search across all nodes with path display
+- **Undo/redo** — snapshot-based, 100-step history (Cmd+Z / Cmd+Shift+Z)
+- **Dark mode** — animated toggle, CSS custom property system, no hardcoded colors
+- **Persistence** — localStorage with debounced saves, export/import JSON, schema versioned
+- **No signup, no cloud** — everything stays in your browser
+
+## Stack
+
+| Concern | Choice |
+|---|---|
+| Framework | Next.js 16 (App Router, SSR disabled for localStorage app) |
+| Language | TypeScript strict |
+| State | Zustand 5 + Immer 11 |
+| Animations | Framer Motion 12 |
+| Drag & Drop | @dnd-kit/core + @dnd-kit/modifiers |
+| Virtual Scroll | @tanstack/react-virtual |
+| Search | fuse.js |
+| Icons | Lucide React |
+| Styling | Tailwind CSS v4 + CSS custom properties |
+| Testing | Vitest |
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). The app seeds sample data (Career, Health, Finance, Learning) on first load.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Keyboard shortcuts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Key | Action |
+|---|---|
+| `↑ ↓` | Navigate tree |
+| `→ ←` | Expand / collapse |
+| `Enter` | Edit node title |
+| `Space` | Toggle complete |
+| `E` | Open node details panel |
+| `Tab` | Indent node |
+| `Shift+Tab` | Outdent node |
+| `Cmd+T` | Toggle Today |
+| `Cmd+K` | Command palette / search |
+| `Cmd+Z` | Undo |
+| `Cmd+Shift+Z` | Redo |
+| `Cmd+D` | Duplicate node |
+| `Cmd+Delete` | Delete node |
+| `Cmd+/` | Shortcuts reference |
+| `Escape` | Close panel / cancel edit |
 
-## Learn More
+## Architecture
 
-To learn more about Next.js, take a look at the following resources:
+**Flat node map** — all nodes live in `Record<string, LifeNode>` with `parentId + childIds[]`. O(1) lookup and move, no deep cloning.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**SSR disabled** — `dynamic({ ssr: false })` on the app shell prevents hydration mismatch for a localStorage-driven app.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Zustand + Immer** — Zustand v5 with `useShallow` on all object selectors. Derived arrays computed with `useMemo` outside selectors to avoid infinite loops.
 
-## Deploy on Vercel
+**Snapshot undo/redo** — each tracked mutation captures `beforeNodes + beforeRootIds` before writing, then stores a before/after `HistoryEntry`. No command objects needed.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Virtual list always on** — @tanstack/react-virtual at 40px row height, overscan 10. Handles thousands of nodes without toggling.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project structure
+
+```
+src/
+├── app/               # Next.js App Router (layout, page, globals.css)
+├── components/
+│   ├── layout/        # AppShell, Sidebar, ContextPanel
+│   ├── tree/          # LifeTree, TreeNode, TreeNodeCheckbox, TreeNodeIcon, TreeNodeTitle
+│   ├── panels/        # NodeDetails, TodayPanel, LifeProgressPanel, TodayView, UpcomingView, ...
+│   ├── overlays/      # CommandPalette, ShortcutsModal, SettingsModal
+│   └── ui/            # ProgressRing, Toast
+├── store/             # Zustand store + selectors
+├── hooks/             # useKeyboard
+├── lib/               # tree.ts (pure utils), storage.ts, seed.ts, search.ts
+└── types/             # LifeNode, View, HistoryEntry, etc.
+```
+
+## Testing
+
+```bash
+npm test
+```
+
+37 tests: 31 pure tree utility tests + 6 performance stress tests (1110-node tree, sub-50ms operations).
+
+## Data
+
+All data lives in `localStorage` under the key `lifeos-state`. Use **Settings → Export** to download a JSON backup. Import and Clear are also available there.
