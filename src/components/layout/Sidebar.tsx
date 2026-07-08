@@ -47,7 +47,6 @@ export function Sidebar() {
     <aside
       style={{
         background: "var(--bg-sidebar)",
-        borderRight: "1px solid var(--border)",
         display: "flex",
         flexDirection: "column",
         height: "100%",

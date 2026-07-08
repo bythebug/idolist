@@ -12,7 +12,6 @@ export function ContextPanel() {
     <aside
       style={{
         background: "var(--bg-panel)",
-        borderLeft: "1px solid var(--border)",
         display: "flex",
         flexDirection: "column",
         height: "100%",
