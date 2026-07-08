@@ -9,9 +9,10 @@ interface Props {
   title: string;
   completed: boolean;
   isEditing: boolean;
+  depth?: number;
 }
 
-export function TreeNodeTitle({ id, title, completed, isEditing }: Props) {
+export function TreeNodeTitle({ id, title, completed, isEditing, depth = 1 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   // Suppresses blur handler when Enter/Tab already handled the action
   const suppressBlurRef = useRef(false);
@@ -147,6 +148,7 @@ export function TreeNodeTitle({ id, title, completed, isEditing }: Props) {
       style={{
         flex: 1,
         fontSize: 14,
+        fontWeight: depth === 0 ? 600 : 400,
         lineHeight: "1.4",
         color: completed ? "var(--text-completed)" : "var(--text-primary)",
         textDecoration: completed ? "line-through" : "none",

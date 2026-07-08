@@ -52,8 +52,8 @@
   --shadow-overlay:      0 16px 48px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
 
   /* Layout */
-  --sidebar-width:       240px;
-  --panel-width:         320px;
+  --sidebar-width:       210px;
+  --panel-width:         260px;
 }
 
 [data-theme="dark"] {

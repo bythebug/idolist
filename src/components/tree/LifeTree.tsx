@@ -95,7 +95,7 @@ export function LifeTree() {
   const rowVirtualizer = useVirtualizer({
     count: visibleNodes.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 36,
+    estimateSize: () => 40,
     overscan: 10,
   });
 
@@ -240,50 +240,62 @@ export function LifeTree() {
       onDragCancel={handleDragCancel}
     >
       <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        {/* Tree header */}
+        {/* Tree toolbar */}
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "12px 16px 8px",
+            padding: "14px 16px 10px",
             borderBottom: "1px solid var(--border-subtle)",
             flexShrink: 0,
           }}
         >
-          <h1
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: "var(--text-secondary)",
-              margin: 0,
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-            }}
-          >
-            Life
-          </h1>
-          <button
-            onClick={handleAddRoot}
-            title="Add area (root node)"
-            aria-label="Add root node"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              padding: "4px 8px",
-              background: "transparent",
-              border: "1px solid var(--border)",
-              borderRadius: 6,
-              cursor: "pointer",
-              fontSize: 12,
-              color: "var(--text-secondary)",
-              fontFamily: "inherit",
-            }}
-          >
-            <Plus size={12} />
-            Add area
-          </button>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+            <div style={{ minWidth: 0 }}>
+              <h1
+                style={{
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: "var(--text-primary)",
+                  margin: 0,
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.2,
+                }}
+              >
+                My Life
+              </h1>
+              <p
+                style={{
+                  fontSize: 12,
+                  color: "var(--text-muted)",
+                  margin: "3px 0 0",
+                }}
+              >
+                A map of everything that matters.
+              </p>
+            </div>
+            <button
+              onClick={handleAddRoot}
+              title="Add area (root node)"
+              aria-label="Add root node"
+              style={{
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                padding: "4px 10px",
+                background: "transparent",
+                border: "1px solid var(--border)",
+                borderRadius: 6,
+                cursor: "pointer",
+                fontSize: 12,
+                color: "var(--text-secondary)",
+                fontFamily: "inherit",
+                marginTop: 2,
+              }}
+            >
+              <Plus size={12} />
+              Add area
+            </button>
+          </div>
         </div>
 
         {/* Column headers */}
@@ -397,6 +409,40 @@ export function LifeTree() {
               );
             })}
           </div>
+
+          {/* "New Item" pinned at bottom of list */}
+          {visibleNodes.length > 0 && (
+            <button
+              onClick={handleAddRoot}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                margin: "6px 12px",
+                padding: "6px 8px",
+                background: "transparent",
+                border: "none",
+                borderRadius: 7,
+                cursor: "pointer",
+                fontSize: 13,
+                color: "var(--text-muted)",
+                fontFamily: "inherit",
+                width: "calc(100% - 24px)",
+                textAlign: "left",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = "var(--text-secondary)";
+                (e.currentTarget as HTMLButtonElement).style.background = "var(--bg-node-hover)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = "var(--text-muted)";
+                (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+              }}
+            >
+              <Plus size={13} />
+              New Item
+            </button>
+          )}
         </div>
       </div>
 
@@ -405,7 +451,7 @@ export function LifeTree() {
         {draggingNode ? (
           <div
             style={{
-              height: 36,
+              height: 40,
               display: "flex",
               alignItems: "center",
               gap: 6,

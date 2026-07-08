@@ -118,7 +118,7 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
       style={{
         display: "flex",
         alignItems: "center",
-        height: 36,
+        height: 40,
         gap: 0,
         cursor: "default",
         borderRadius: 8,
@@ -215,7 +215,7 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
         <TreeNodeCheckbox completed={node.completed} onToggle={() => toggleComplete(id)} />
 
         {/* Title */}
-        <TreeNodeTitle id={id} title={node.title} completed={node.completed} isEditing={isEditing} />
+        <TreeNodeTitle id={id} title={node.title} completed={node.completed} isEditing={isEditing} depth={depth} />
 
         {/* Hover actions */}
         <div
