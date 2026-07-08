@@ -16,12 +16,13 @@ import { useShallow } from "zustand/react/shallow";
 import { selectTodayCount, selectUpcomingCount } from "@/store/selectors";
 import { LifeProgressPanel } from "@/components/panels/LifeProgressPanel";
 import type { View } from "@/types";
+import { INBOX_ID } from "@/types";
 
-const NAV_ITEMS: { id: View | "inbox" | "graph" | "calendar" | "notes"; label: string; icon: React.ComponentType<{ size?: number }>; view?: View }[] = [
+const NAV_ITEMS: { id: View | "graph" | "calendar" | "notes"; label: string; icon: React.ComponentType<{ size?: number }>; view?: View }[] = [
   { id: "life",     label: "Life",     icon: Home,       view: "life" },
   { id: "today",    label: "Today",    icon: Sun,        view: "today" },
   { id: "upcoming", label: "Upcoming", icon: Clock,      view: "upcoming" },
-  { id: "inbox",    label: "Inbox",    icon: Inbox },
+  { id: "inbox",    label: "Inbox",    icon: Inbox,      view: "inbox" },
   { id: "search",   label: "Search",   icon: Search },
   { id: "graph",    label: "Graph",    icon: GitBranch },
   { id: "calendar", label: "Calendar", icon: Calendar },
@@ -42,6 +43,7 @@ export function Sidebar() {
 
   const todayCount = selectTodayCount(nodes, todayIds);
   const upcomingCount = selectUpcomingCount(nodes);
+  const inboxCount = (nodes[INBOX_ID]?.childIds ?? []).filter((id) => nodes[id] && !nodes[id].archived && !nodes[id].completed).length;
 
   return (
     <aside
@@ -92,7 +94,7 @@ export function Sidebar() {
           const Icon = item.icon;
           const isActive = item.view ? view === item.view : false;
           const isAvailable = !!item.view;
-          const badge = item.id === "today" ? todayCount : item.id === "upcoming" ? upcomingCount : 0;
+          const badge = item.id === "today" ? todayCount : item.id === "upcoming" ? upcomingCount : item.id === "inbox" ? inboxCount : 0;
 
           return (
             <button

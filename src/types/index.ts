@@ -4,7 +4,9 @@ export type ReminderOption = "none" | "today" | "tomorrow" | "custom";
 
 export type RepeatOption = "none" | "daily" | "weekly" | "monthly";
 
-export type View = "life" | "today" | "upcoming" | "completed" | "archive";
+export type View = "life" | "today" | "upcoming" | "inbox" | "completed" | "archive";
+
+export const INBOX_ID = "__inbox__";
 
 export interface LifeNode {
   id: string;

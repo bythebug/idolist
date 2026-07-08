@@ -6,6 +6,7 @@ import { nanoid } from "nanoid";
 // Immer requires this to support Set and Map mutations in producers
 enableMapSet();
 import type { LifeNode, View, DragState, RepeatOption } from "@/types";
+import { INBOX_ID } from "@/types";
 import { getSubtree } from "@/lib/tree";
 import {
   loadState,
@@ -77,6 +78,9 @@ interface StoreActions {
   openSettings: () => void;
   closeSettings: () => void;
 
+  // Inbox
+  addToInbox: (title: string) => string;
+
   // Today
   addToToday: (id: string) => void;
   removeFromToday: (id: string) => void;
@@ -138,6 +142,32 @@ function loadInitialState(): StoreState {
       (id) => persisted.nodes[id]?.completed
     );
     completedTodayIds.forEach((id) => todayIds.delete(id));
+  }
+
+  // Ensure the hidden inbox root node always exists
+  if (!persisted.nodes[INBOX_ID]) {
+    const now = Date.now();
+    persisted.nodes[INBOX_ID] = {
+      id: INBOX_ID,
+      title: "Inbox",
+      type: "area",
+      parentId: null,
+      childIds: [],
+      completed: false,
+      collapsed: false,
+      archived: false,
+      reminder: "none",
+      repeat: "none",
+      lastCompletedAt: null,
+      dueDate: null,
+      notes: "",
+      icon: "📥",
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
+  if (!persisted.rootIds.includes(INBOX_ID)) {
+    persisted.rootIds.push(INBOX_ID);
   }
 
   return {
@@ -576,6 +606,40 @@ export const useStore = create<IdolistStore>()(
         set((state) => {
           state.settingsOpen = false;
         }),
+
+      addToInbox: (title) => {
+        const id = nanoid();
+        const now = Date.now();
+        const beforeNodes = get().nodes;
+        const beforeRootIds = get().rootIds;
+
+        set((state) => {
+          state.nodes[id] = {
+            id,
+            title,
+            type: "task",
+            parentId: INBOX_ID,
+            childIds: [],
+            completed: false,
+            collapsed: false,
+            archived: false,
+            reminder: "none",
+            repeat: "none",
+            lastCompletedAt: null,
+            dueDate: null,
+            notes: "",
+            icon: null,
+            createdAt: now,
+            updatedAt: now,
+          };
+          const inbox = state.nodes[INBOX_ID];
+          if (inbox) inbox.childIds.push(id);
+        });
+
+        recordHistory("Add to inbox", beforeNodes, beforeRootIds);
+        debouncedSave(get);
+        return id;
+      },
 
       addToToday: (id) => {
         set((state) => {

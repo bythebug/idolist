@@ -7,6 +7,7 @@ import { Sidebar } from "./Sidebar";
 import { ContextPanel } from "./ContextPanel";
 import { LifeTree } from "@/components/tree/LifeTree";
 import { TodayView } from "@/components/panels/TodayView";
+import { InboxView } from "@/components/panels/InboxView";
 import { UpcomingView } from "@/components/panels/UpcomingView";
 import { CompletedView } from "@/components/panels/CompletedView";
 import { ArchiveView } from "@/components/panels/ArchiveView";
@@ -144,6 +145,7 @@ export function AppShell() {
       >
         {view === "life" && <LifeTree />}
         {view === "today" && <TodayView />}
+        {view === "inbox" && <InboxView />}
         {view === "upcoming" && <UpcomingView />}
         {view === "completed" && <CompletedView />}
         {view === "archive" && <ArchiveView />}

@@ -1,4 +1,5 @@
 import type { LifeNode, VisibleNode, SearchResult } from "@/types";
+import { INBOX_ID } from "@/types";
 import {
   getVisibleNodes,
   getParentChain,
@@ -13,7 +14,7 @@ export function selectVisibleNodes(
   view: string
 ): VisibleNode[] {
   if (view !== "life") return [];
-  return getVisibleNodes(nodes, rootIds, collapsedIds);
+  return getVisibleNodes(nodes, rootIds.filter((id) => id !== INBOX_ID), collapsedIds);
 }
 
 export function selectBreadcrumb(

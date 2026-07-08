@@ -34,7 +34,7 @@ export function LifeProgressPanel() {
       rootIds
         .map((id, i) => {
           const node = nodes[id];
-          if (!node || node.archived) return null;
+          if (!node || node.archived || id === "__inbox__") return null;
           const ratio = getSubtreeCompletionRatio(nodes, id);
           return { id, title: node.title, icon: node.icon, ratio, color: AREA_COLORS[i % AREA_COLORS.length] };
         })
