@@ -37,9 +37,22 @@ export function InboxView() {
   );
 
   const areas = useMemo(
-    () => rootIds.filter((id) => id !== INBOX_ID && nodes[id] && !nodes[id].archived),
+    () => rootIds.filter((id) => id !== INBOX_ID && nodes[id] && !nodes[id].archived)
+      .map((id) => nodes[id]!),
     [rootIds, nodes]
   );
+
+  // Match parsed area hint against real areas (exact → starts-with → contains)
+  const matchedArea = useMemo<LifeNode | null>(() => {
+    if (!parsed.areaHint) return null;
+    const hint = parsed.areaHint.toLowerCase();
+    return (
+      areas.find((a) => a.title.toLowerCase() === hint) ??
+      areas.find((a) => a.title.toLowerCase().startsWith(hint) || hint.startsWith(a.title.toLowerCase())) ??
+      areas.find((a) => a.title.toLowerCase().includes(hint) || hint.includes(a.title.toLowerCase())) ??
+      null
+    );
+  }, [parsed.areaHint, areas]);
 
   function submit() {
     if (!draft.trim()) return;
@@ -47,6 +60,7 @@ export function InboxView() {
     if (parsed.dueDate) updateNode(id, { dueDate: parsed.dueDate, dueTime: parsed.dueTime ?? null });
     if (parsed.reminder !== "none") updateNode(id, { reminder: parsed.reminder });
     if (parsed.isToday) addToToday(id);
+    if (matchedArea) moveNode(id, matchedArea.id, matchedArea.childIds.length);
     setDraft("");
     inputRef.current?.focus();
   }
@@ -132,26 +146,26 @@ export function InboxView() {
           )}
         </div>
 
-        {/* NLP preview chip */}
-        {draft.trim() && parsed.dateLabel && (
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, paddingLeft: 2 }}>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 5,
-                padding: "3px 9px",
-                background: "var(--accent-subtle)",
-                border: "1px solid var(--accent)",
-                borderRadius: 99,
-                fontSize: 12,
-                color: "var(--accent)",
-                fontWeight: 500,
-              }}
-            >
-              <Calendar size={11} />
-              {parsed.dateLabel}
-            </div>
+        {/* NLP preview chips */}
+        {draft.trim() && (parsed.dateLabel || matchedArea || parsed.areaHint) && (
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, paddingLeft: 2, flexWrap: "wrap" }}>
+            {parsed.dateLabel && (
+              <div style={chipStyle("accent")}>
+                <Calendar size={11} />
+                {parsed.dateLabel}
+              </div>
+            )}
+            {matchedArea && (
+              <div style={chipStyle("success")}>
+                {matchedArea.icon ? `${matchedArea.icon} ` : ""}
+                {matchedArea.title}
+              </div>
+            )}
+            {parsed.areaHint && !matchedArea && (
+              <div style={chipStyle("muted")} title="No matching area found">
+                ? {parsed.areaHint}
+              </div>
+            )}
             {parsed.title !== draft.trim() && (
               <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
                 → &ldquo;{parsed.title}&rdquo;
@@ -174,7 +188,7 @@ export function InboxView() {
               <InboxItem
                 key={node.id}
                 node={node}
-                areas={areas.map((id) => nodes[id]!)}
+                areas={areas}
                 onToggle={() => toggleComplete(node.id)}
                 onDelete={() => deleteNode(node.id)}
                 onOpen={() => setSelected(node.id)}
@@ -191,7 +205,7 @@ export function InboxView() {
                   <InboxItem
                     key={node.id}
                     node={node}
-                    areas={areas.map((id) => nodes[id]!)}
+                    areas={areas}
                     onToggle={() => toggleComplete(node.id)}
                     onDelete={() => deleteNode(node.id)}
                     onOpen={() => setSelected(node.id)}
@@ -316,6 +330,19 @@ function InboxItem({
       </div>
     </div>
   );
+}
+
+function chipStyle(tone: "accent" | "success" | "muted"): React.CSSProperties {
+  const map = {
+    accent: { color: "var(--accent)", background: "var(--accent-subtle)", border: "1px solid var(--accent)" },
+    success: { color: "var(--success)", background: "var(--success-subtle)", border: "1px solid var(--success)" },
+    muted:  { color: "var(--text-muted)", background: "var(--bg-node-hover)", border: "1px solid var(--border)" },
+  };
+  return {
+    display: "inline-flex", alignItems: "center", gap: 5,
+    padding: "3px 9px", borderRadius: 99, fontSize: 12, fontWeight: 500,
+    ...map[tone],
+  };
 }
 
 const iconBtnStyle: React.CSSProperties = {
