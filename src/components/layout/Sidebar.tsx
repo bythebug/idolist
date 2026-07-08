@@ -30,11 +30,13 @@ const NAV_ITEMS: { id: View | "graph" | "calendar" | "notes"; label: string; ico
 ];
 
 export function Sidebar() {
-  const { view, nodes, todayIds, setView, openCommandPalette, openSettings } = useStore(
+  const { view, nodes, todayIds, userName, userAvatar, setView, openCommandPalette, openSettings } = useStore(
     useShallow((s) => ({
       view: s.view,
       nodes: s.nodes,
       todayIds: s.todayIds,
+      userName: s.userName,
+      userAvatar: s.userAvatar,
       setView: s.setView,
       openCommandPalette: s.openCommandPalette,
       openSettings: s.openSettings,
@@ -55,38 +57,51 @@ export function Sidebar() {
         userSelect: "none",
       }}
     >
-      {/* App identity */}
-      <div
+      {/* User profile */}
+      <button
+        onClick={openSettings}
         style={{
-          padding: "16px 14px 10px",
+          padding: "12px 14px",
           borderBottom: "1px solid var(--border-subtle)",
           flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          background: "transparent",
+          border: "none",
+          borderBottom: "1px solid var(--border-subtle)",
+          cursor: "pointer",
+          width: "100%",
+          textAlign: "left",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 8,
-              background: "var(--accent)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 14,
-              flexShrink: 0,
-            }}
-          >
-            🌿
-          </div>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
-              idolist
-            </div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Your life, organized</div>
-          </div>
+        {/* Avatar */}
+        <div
+          style={{
+            width: 30,
+            height: 30,
+            borderRadius: "50%",
+            background: "var(--accent)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: userAvatar && userAvatar.length > 1 ? 16 : 13,
+            fontWeight: 600,
+            color: "#fff",
+            flexShrink: 0,
+            lineHeight: 1,
+          }}
+        >
+          {userAvatar || (userName ? userName[0].toUpperCase() : "🌿")}
         </div>
-      </div>
+        {/* Name */}
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {userName || "idolist"}
+          </div>
+          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Your life, organized</div>
+        </div>
+      </button>
 
       {/* Navigation */}
       <nav style={{ padding: "6px 8px", flexShrink: 0 }}>

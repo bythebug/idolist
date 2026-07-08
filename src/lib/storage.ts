@@ -13,6 +13,8 @@ export interface PersistedState {
   lastResetDate: string;
   view: View;
   darkMode: boolean;
+  userName?: string;
+  userAvatar?: string;
 }
 
 export function loadState(): PersistedState {

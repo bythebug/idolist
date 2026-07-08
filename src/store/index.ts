@@ -46,6 +46,8 @@ interface StoreState {
   lastResetDate: string;
   dragState: DragState | null;
   darkMode: boolean;
+  userName: string;
+  userAvatar: string;       // emoji or single letter used as avatar
   undoStack: HistoryEntry[];
   redoStack: HistoryEntry[];
   toast: { message: string; id: number } | null;
@@ -92,6 +94,8 @@ interface StoreActions {
 
   // Settings
   toggleDarkMode: () => void;
+  setUserName: (name: string) => void;
+  setUserAvatar: (avatar: string) => void;
 
   // Undo / redo
   undo: () => void;
@@ -123,6 +127,8 @@ function debouncedSave(get: () => IdolistStore) {
       lastResetDate: s.lastResetDate,
       view: s.view,
       darkMode: s.darkMode,
+      userName: s.userName,
+      userAvatar: s.userAvatar,
     };
     saveState(persisted);
   }, 300);
@@ -186,6 +192,8 @@ function loadInitialState(): StoreState {
     settingsOpen: false,
     dragState: null,
     darkMode: persisted.darkMode ?? false,
+    userName: persisted.userName ?? "",
+    userAvatar: persisted.userAvatar ?? "",
     undoStack: [],
     redoStack: [],
     toast: null,
@@ -208,6 +216,8 @@ function emptyState(): StoreState {
     settingsOpen: false,
     dragState: null,
     darkMode: false,
+    userName: "",
+    userAvatar: "",
     undoStack: [],
     redoStack: [],
     toast: null,
@@ -710,6 +720,16 @@ export const useStore = create<IdolistStore>()(
         set((state) => {
           state.darkMode = !state.darkMode;
         });
+        debouncedSave(get);
+      },
+
+      setUserName: (name) => {
+        set((state) => { state.userName = name; });
+        debouncedSave(get);
+      },
+
+      setUserAvatar: (avatar) => {
+        set((state) => { state.userAvatar = avatar; });
         debouncedSave(get);
       },
 

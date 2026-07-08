@@ -12,7 +12,7 @@ const VERSION = "1.0.0";
 export function SettingsModal({ onClose }: { onClose: () => void }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { darkMode, nodes, rootIds, collapsedIds, todayIds, lastResetDate, view, toggleDarkMode } =
+  const { darkMode, nodes, rootIds, collapsedIds, todayIds, lastResetDate, view, userName, userAvatar, toggleDarkMode, setUserName, setUserAvatar } =
     useStore(useShallow((s) => ({
       darkMode: s.darkMode,
       nodes: s.nodes,
@@ -21,7 +21,11 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
       todayIds: s.todayIds,
       lastResetDate: s.lastResetDate,
       view: s.view,
+      userName: s.userName,
+      userAvatar: s.userAvatar,
       toggleDarkMode: s.toggleDarkMode,
+      setUserName: s.setUserName,
+      setUserAvatar: s.setUserAvatar,
     })));
 
   function handleExport() {
@@ -134,6 +138,49 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
 
         {/* Body */}
         <div style={{ padding: "8px 0" }}>
+          {/* Profile */}
+          <div style={{ padding: "8px 16px 12px", borderBottom: "1px solid var(--border-subtle)" }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+              Profile
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              {/* Avatar preview */}
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: "50%",
+                  background: "var(--accent)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: userAvatar && userAvatar.length > 1 ? 22 : 16,
+                  fontWeight: 600,
+                  color: "#fff",
+                  flexShrink: 0,
+                  lineHeight: 1,
+                }}
+              >
+                {userAvatar || (userName ? userName[0].toUpperCase() : "🌿")}
+              </div>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                <input
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  placeholder="Your name"
+                  style={inputStyle}
+                />
+                <input
+                  value={userAvatar}
+                  onChange={(e) => setUserAvatar(e.target.value)}
+                  placeholder="Avatar emoji (e.g. 🧑‍💻)"
+                  style={inputStyle}
+                  maxLength={4}
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Dark mode */}
           <SettingRow
             icon={darkMode ? <Moon size={15} /> : <Sun size={15} />}
@@ -263,6 +310,18 @@ const actionBtnStyle: React.CSSProperties = {
   fontFamily: "inherit",
   fontWeight: 500,
   whiteSpace: "nowrap",
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "5px 8px",
+  fontSize: 13,
+  color: "var(--text-primary)",
+  background: "var(--bg-node-hover)",
+  border: "1px solid var(--border)",
+  borderRadius: "var(--radius-sm)",
+  outline: "none",
+  fontFamily: "inherit",
 };
 
 function SettingRow({

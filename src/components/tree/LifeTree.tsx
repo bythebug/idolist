@@ -260,17 +260,8 @@ export function LifeTree() {
                   lineHeight: 1.2,
                 }}
               >
-                idolist
+                Life
               </h1>
-              <p
-                style={{
-                  fontSize: 12,
-                  color: "var(--text-muted)",
-                  margin: "3px 0 0",
-                }}
-              >
-                Your life, organized.
-              </p>
             </div>
             <button
               onClick={handleAddRoot}
