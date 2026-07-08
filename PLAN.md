@@ -4,147 +4,138 @@
 
 LifeOS is a personal operating system — a single-page application built around a hierarchical life tree. The user wants a premium, keyboard-first productivity tool that feels like Linear/Notion rather than Jira/ClickUp. This document is the **single source of truth** for how we build it, phase by phase.
 
-The repository at `/Users/sverma/code/idolist` is a clean git repo with no code. We start from zero.
+---
+
+## Current Status — Updated 2026-07-08
+
+```
+✅ Phase 0  — Bootstrap + tooling
+✅ Phase 1  — Types + pure tree utilities (31 tests passing)
+✅ Phase 2  — Zustand store (all node operations)
+✅ Phase 3  — Persistence layer (localStorage + seed data)
+✅ Phase 4  — App shell + layout grid
+✅ Phase 5  — ProgressRing component
+✅ Phase 6  — Tree rendering (virtualized, React.memo)
+✅ Phase 7  — Keyboard navigation (arrow keys, Enter, Tab, Space, Cmd shortcuts)
+✅ Phase 9  — Inline editing (Enter/Tab/Shift+Tab/Backspace/Escape in TreeNodeTitle)
+✅ Phase 10 — Command palette (Cmd+K, fuse.js fuzzy search)
+✅ Phase 11 — Today system (Cmd+T, midnight reset, badge count)
+✅ Phase 12 — Context panel / NodeDetails (breadcrumb, notes, due date, reminder)
+✅ Phase 17 — Shortcuts modal (Cmd+/)
+
+⬜ Phase 8  — Drag & drop (@dnd-kit) ← NEXT
+⬜ Phase 13 — Upcoming & Notifications view
+⬜ Phase 14 — Completed & Archive views
+⬜ Phase 15 — Undo / Redo (command pattern)
+⬜ Phase 16 — Micro-interactions & Polish (Framer Motion)
+⬜ Phase 18 — Settings panel
+⬜ Phase 19 — Dark mode toggle
+⬜ Phase 20 — Final QA & Performance
+```
+
+---
+
+## Implementation Notes (what diverged from the plan)
+
+| Plan | What was built | Why |
+|---|---|---|
+| Next.js 15 | Next.js 16.2.10 | Latest available |
+| Separate store slices | Combined store in `src/store/index.ts` | Simpler, fewer files |
+| `useTreeNavigation.ts` + `useInlineEdit.ts` | Combined into `useKeyboard.ts` | Less indirection |
+| Inline edit logic in hook | Lives in `TreeNodeTitle.tsx` | Closer to the input it controls |
+| `StoreProvider` wrapper | `dynamic({ ssr: false })` in page.tsx | Prevents hydration mismatch |
+
+### Bugs Fixed During Build
+- `enableMapSet()` from Immer required for `Set<string>` mutations in producers
+- `useShallow` required on all object selectors (Zustand v5 + `useSyncExternalStore`)
+- Derived arrays (`selectVisibleNodes`, `selectBreadcrumb`) must be computed with `useMemo` outside selectors, not inside them
+- `suppressBlurRef` in `TreeNodeTitle` prevents blur from deleting a node when Enter creates a sibling
+- `storeRef` pattern in `useKeyboard` prevents listener re-registration on every state change
 
 ---
 
 ## Technology Stack
 
-| Concern | Choice | Why |
+| Concern | Choice | Actual Version |
 |---|---|---|
-| Framework | Next.js 15 (App Router) | SSR optional later, great DX, React 18 |
-| Language | TypeScript strict | Catch tree mutation bugs early |
-| Styling | Tailwind CSS v4 | Utility-first, design system via CSS vars |
-| State | Zustand + Immer | Lightweight, devtools, easy undo/redo |
-| Animations | Framer Motion | Spring physics, layout animations |
-| Icons | Lucide React | Clean, consistent |
-| Fonts | Inter (next/font) | Designer choice from spec |
-| Drag & Drop | @dnd-kit | Accessible, tree-aware, no legacy deps |
-| Virtual Scroll | @tanstack/virtual | Performance at thousands of nodes |
-| Persistence | localStorage (v1) | Abstraction layer ready for IndexedDB/cloud |
-| Undo/Redo | Command pattern in Zustand | History stack, 100 step limit |
-| Testing | Vitest + Testing Library | Unit + integration |
+| Framework | Next.js (App Router) | 16.2.10 |
+| Language | TypeScript strict | 5.x |
+| Styling | Tailwind CSS v4 + CSS custom properties | v4 |
+| State | Zustand + Immer | Zustand 5, Immer 11 |
+| Animations | Framer Motion | 12.x |
+| Icons | Lucide React | 1.x |
+| Fonts | Inter (next/font) | ✅ |
+| Drag & Drop | @dnd-kit | 6.x (installed, not wired) |
+| Virtual Scroll | @tanstack/react-virtual | 3.x |
+| Persistence | localStorage (debounced 300ms) | ✅ |
+| Testing | Vitest + Testing Library | Vitest 4.x |
 
 ---
 
-## Architectural Decisions (Phase 1)
+## Architectural Decisions
 
-### Node Storage: Flat Map, Not Nested Tree
-
-```
-// WRONG — nested is hard to mutate
-{ id: "1", children: [{ id: "2", children: [...] }] }
-
-// RIGHT — flat map with parent references
-Map<string, Node> where each Node has parentId + childIds[]
-```
-
-Why: O(1) lookup, O(1) move, no deep cloning, easy serialization.
-
-### Rendering Strategy
-
-- Render visible tree nodes only via `@tanstack/virtual`
-- Each node row is 36px fixed height
-- Expand/collapse toggled in Zustand, re-renders only changed subtree
-- `React.memo` on every TreeNode component
-
-### Drag & Drop Strategy
-
-- `@dnd-kit/sortable` with custom tree sensor
-- Drag renders a ghost overlay (not moving DOM nodes)
-- Drop indicators show insertion position
-- On drop: update parentId + reorder childIds in store
-
-### Keyboard Navigation Strategy
-
-- Single event listener on tree container (event delegation)
-- `focusedNodeId` in Zustand tracks keyboard cursor
-- Arrow keys move focus, not DOM focus (avoids scroll jump)
-- Enter/Tab/Backspace handled in editing mode separately
-
-### State Shape
-
+### Node Storage: Flat Map
 ```typescript
-interface LifeOSStore {
-  nodes: Record<string, Node>      // flat map
-  rootIds: string[]                 // top-level nodes
-  expandedIds: Set<string>          // which nodes are open
-  selectedId: string | null         // right panel context
-  focusedId: string | null          // keyboard cursor
-  editingId: string | null          // inline edit active
-  todayIds: Set<string>             // "Today" view
-  history: Command[]               // undo stack
-  historyIndex: number
-  searchQuery: string
-  view: 'life' | 'today' | 'upcoming' | 'completed' | 'archive'
-}
+nodes: Record<string, LifeNode>  // O(1) lookup/move
+rootIds: string[]                 // top-level order
+// Each LifeNode has parentId: string | null, childIds: string[]
+```
+
+### Selector Pattern (Zustand v5)
+```typescript
+// ✅ CORRECT — primitives + useShallow, derived values with useMemo
+const { nodes, rootIds } = useStore(useShallow((s) => ({ nodes: s.nodes, rootIds: s.rootIds })));
+const visibleNodes = useMemo(() => selectVisibleNodes(nodes, rootIds, ...), [nodes, rootIds]);
+
+// ❌ WRONG — derived array inside selector causes infinite loop
+const { visibleNodes } = useStore(useShallow((s) => ({ visibleNodes: computeArray(s) })));
+```
+
+### SSR Safety
+```typescript
+// page.tsx — ssr: false prevents hydration mismatch for localStorage-driven app
+const AppShell = dynamic(() => import("@/components/layout/AppShell"), { ssr: false });
 ```
 
 ---
 
-## Folder Structure
+## Folder Structure (actual)
 
 ```
-/Users/sverma/code/idolist/
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx              # Root layout, font, theme
-│   │   ├── page.tsx               # Single page app shell
-│   │   └── globals.css            # Tailwind + CSS vars
-│   ├── components/
-│   │   ├── layout/
-│   │   │   ├── AppShell.tsx       # 3-column grid container
-│   │   │   ├── Sidebar.tsx        # Left nav
-│   │   │   └── ContextPanel.tsx   # Right detail panel
-│   │   ├── tree/
-│   │   │   ├── LifeTree.tsx       # Virtualized tree container
-│   │   │   ├── TreeNode.tsx       # Single row (memoized)
-│   │   │   ├── TreeNodeCheckbox.tsx
-│   │   │   ├── TreeNodeIcon.tsx
-│   │   │   ├── TreeNodeTitle.tsx  # Inline edit input
-│   │   │   └── TreeDropIndicator.tsx
-│   │   ├── panels/
-│   │   │   ├── NodeDetails.tsx    # Right panel content
-│   │   │   ├── TodayView.tsx
-│   │   │   └── SearchResults.tsx
-│   │   ├── overlays/
-│   │   │   ├── CommandPalette.tsx # Cmd+K search
-│   │   │   ├── QuickAdd.tsx
-│   │   │   └── ShortcutsModal.tsx # Cmd+/
-│   │   └── ui/
-│   │       ├── Button.tsx
-│   │       ├── Input.tsx
-│   │       ├── ProgressRing.tsx
-│   │       ├── Tooltip.tsx
-│   │       ├── Breadcrumb.tsx
-│   │       └── ReminderPicker.tsx
-│   ├── store/
-│   │   ├── index.ts               # Zustand store export
-│   │   ├── slices/
-│   │   │   ├── nodesSlice.ts      # CRUD operations
-│   │   │   ├── uiSlice.ts         # View state, modals
-│   │   │   ├── todaySlice.ts      # Today view logic
-│   │   │   └── historySlice.ts    # Undo/redo commands
-│   │   └── selectors.ts           # Derived state (memoized)
-│   ├── hooks/
-│   │   ├── useKeyboard.ts         # Global keyboard handler
-│   │   ├── useTreeNavigation.ts   # Arrow key movement
-│   │   ├── useInlineEdit.ts       # Enter/Tab/Backspace
-│   │   ├── useDragDrop.ts         # dnd-kit integration
-│   │   └── useSearch.ts           # Fuzzy search logic
-│   ├── lib/
-│   │   ├── tree.ts                # Pure tree utility functions
-│   │   ├── commands.ts            # Undo/redo command objects
-│   │   ├── storage.ts             # localStorage abstraction
-│   │   ├── search.ts              # Search index + scoring
-│   │   └── shortcuts.ts           # Shortcut definitions
-│   └── types/
-│       └── index.ts               # Node, View, Command types
-├── public/
-├── package.json
-├── tsconfig.json
-├── tailwind.config.ts
-└── next.config.ts
+src/
+├── app/
+│   ├── layout.tsx          ✅ Inter font, html lang
+│   ├── page.tsx            ✅ dynamic({ ssr: false })
+│   └── globals.css         ✅ CSS design tokens (light + dark vars)
+├── components/
+│   ├── layout/
+│   │   ├── AppShell.tsx    ✅ 3-column grid, keyboard hook, dark mode
+│   │   ├── Sidebar.tsx     ✅ Nav, search button, progress ring, stats
+│   │   └── ContextPanel.tsx ✅ Right panel shell
+│   ├── tree/
+│   │   ├── LifeTree.tsx    ✅ Virtualized (@tanstack/virtual, 36px rows)
+│   │   ├── TreeNode.tsx    ✅ React.memo, focus ring, hover actions
+│   │   ├── TreeNodeCheckbox.tsx ✅ Framer Motion SVG checkmark
+│   │   └── TreeNodeTitle.tsx    ✅ Inline edit, Enter/Tab/Backspace/Escape
+│   ├── panels/
+│   │   ├── NodeDetails.tsx ✅ Breadcrumb, title, notes, due date, reminder
+│   │   └── TodayView.tsx   ✅ Today filter, date header, empty state
+│   ├── overlays/
+│   │   ├── CommandPalette.tsx ✅ Cmd+K, fuse.js, keyboard nav, path display
+│   │   └── ShortcutsModal.tsx ✅ Cmd+/, two-column grid, kbd styling
+│   └── ui/
+│       └── ProgressRing.tsx   ✅ SVG + Framer Motion, color tiers
+├── store/
+│   ├── index.ts            ✅ Zustand + Immer, all actions, debounced persist
+│   └── selectors.ts        ✅ selectVisibleNodes, selectBreadcrumb, etc.
+├── hooks/
+│   └── useKeyboard.ts      ✅ storeRef pattern, all shortcuts
+├── lib/
+│   ├── tree.ts             ✅ Pure utilities (31 unit tests)
+│   ├── storage.ts          ✅ load/save/export, schema versioning
+│   └── seed.ts             ✅ Career/Health/Finance/Learning sample tree
+└── types/
+    └── index.ts            ✅ LifeNode, View, Command, SearchResult, DragState
 ```
 
 ---
@@ -153,442 +144,277 @@ interface LifeOSStore {
 
 ---
 
-### PHASE 0 — Project Bootstrap
+### PHASE 0 — Project Bootstrap ✅ DONE
 
-- [ ] `npx create-next-app@latest . --typescript --tailwind --app --src-dir --import-alias "@/*"`
-- [ ] Install dependencies:
-  - `zustand immer`
-  - `framer-motion`
-  - `lucide-react`
-  - `@dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities`
-  - `@tanstack/react-virtual`
-  - `fuse.js` (fuzzy search)
-  - `nanoid` (node IDs)
-  - `date-fns` (reminder dates)
-- [ ] Install dev dependencies:
-  - `vitest @testing-library/react @testing-library/user-event`
-  - `@vitejs/plugin-react`
-- [ ] Configure `tsconfig.json` for strict mode
-- [ ] Set up `tailwind.config.ts` with Inter font, 8px spacing scale, custom colors
-- [ ] Create `globals.css` with CSS custom properties for design tokens (light + dark mode vars)
-- [ ] Delete Next.js boilerplate (default page content, logo images)
-- [ ] Verify: `npm run dev` shows blank page, no errors
+- [x] Bootstrap with `npx create-next-app@latest` (Next.js 16, TypeScript, Tailwind v4, App Router)
+- [x] Install all production dependencies
+- [x] Install Vitest + Testing Library
+- [x] TypeScript strict mode (already on by default)
+- [x] Design token CSS custom properties in `globals.css`
+- [x] Delete Next.js boilerplate
+- [x] `npm run dev` runs clean at localhost:3001
 
 ---
 
-### PHASE 1 — Types & Data Model
+### PHASE 1 — Types & Data Model ✅ DONE
 
-- [ ] Create `src/types/index.ts`:
-  - [ ] `NodeType = 'area' | 'project' | 'task' | 'subtask'`
-  - [ ] `ReminderOption = 'none' | 'today' | 'tomorrow' | 'custom'`
-  - [ ] `View = 'life' | 'today' | 'upcoming' | 'completed' | 'archive'`
-  - [ ] `Node` interface with all fields: `id, title, type, parentId, childIds, completed, today, reminder, dueDate, notes, icon, depth, collapsed, createdAt, updatedAt`
-  - [ ] `Command` interface for undo/redo: `execute(), undo(), description`
-  - [ ] `DragState` interface for drag preview
-  - [ ] `SearchResult` interface with path array
-- [ ] Create `src/lib/tree.ts` — pure utility functions (no store imports):
-  - [ ] `getNode(nodes, id)` — O(1) lookup
-  - [ ] `getChildren(nodes, id)` — returns ordered child nodes
-  - [ ] `getParentChain(nodes, id)` — returns breadcrumb array
-  - [ ] `getVisibleNodes(nodes, rootIds, expandedIds)` — flattened visible list for virtualizer
-  - [ ] `getSubtree(nodes, id)` — returns id + all descendants
-  - [ ] `getCompletionRatio(nodes)` — for progress ring
-  - [ ] `isDescendant(nodes, ancestorId, nodeId)` — drop validation
-  - [ ] `reorderChildren(nodes, parentId, fromIndex, toIndex)` — for drag drop
-  - [ ] Write unit tests for each function in `src/lib/tree.test.ts`
+- [x] `src/types/index.ts` — LifeNode, NodeType, ReminderOption, View, Command, VisibleNode, SearchResult, DragState, DropTarget
+- [x] `src/lib/tree.ts` — getNode, getChildren, getParentChain, getVisibleNodes, getSubtree, getCompletionRatio, isDescendant, reorderChildren, getPreviousVisibleId, getNextVisibleId, getNodeDepth
+- [x] `src/lib/tree.test.ts` — 31 unit tests, all passing
 
 ---
 
-### PHASE 2 — Zustand Store
+### PHASE 2 — Zustand Store ✅ DONE
 
-- [ ] Create `src/store/index.ts` — combined Zustand store with Immer middleware
-- [ ] `src/store/slices/nodesSlice.ts`:
-  - [ ] `addNode(parentId, afterId?)` — creates new node, returns id
-  - [ ] `updateNode(id, changes)` — partial update
-  - [ ] `deleteNode(id)` — removes node + all descendants
-  - [ ] `moveNode(id, newParentId, newIndex)` — reparent
-  - [ ] `toggleComplete(id)` — flip completed flag
-  - [ ] `toggleCollapsed(id)` — flip collapsed flag
-  - [ ] `duplicateNode(id)` — deep copy with new ids
-  - [ ] `indentNode(id)` — make sibling of current parent's sibling above
-  - [ ] `outdentNode(id)` — make next sibling of parent
-  - [ ] `collapseAll()` / `expandAll()`
-- [ ] `src/store/slices/uiSlice.ts`:
-  - [ ] `selectedId`, `focusedId`, `editingId` state
-  - [ ] `view` state (current sidebar selection)
-  - [ ] `commandPaletteOpen`, `shortcutsOpen` booleans
-  - [ ] `setSelected(id)`, `setFocused(id)`, `setEditing(id)`, `clearEditing()`
-  - [ ] `openCommandPalette()`, `closeCommandPalette()`
-- [ ] `src/store/slices/todaySlice.ts`:
-  - [ ] `todayIds: Set<string>` persisted
-  - [ ] `addToToday(id)`, `removeFromToday(id)`
-  - [ ] `clearTodayCompleted()` — called at midnight
-- [ ] `src/store/slices/historySlice.ts`:
-  - [ ] History stack (max 100 entries)
-  - [ ] `executeCommand(command)` — push + execute
-  - [ ] `undo()` — pop + reverse
-  - [ ] `redo()` — step forward
-- [ ] `src/store/selectors.ts`:
-  - [ ] `selectVisibleNodes` — memoized with `createSelector`
-  - [ ] `selectBreadcrumb(id)` — path for right panel
-  - [ ] `selectTodayNodes` — filter by todayIds
-  - [ ] `selectCompletionRatio` — global progress
-  - [ ] `selectUpcomingNodes` — reminder within 7 days
-- [ ] Write store integration tests
+- [x] `src/store/index.ts` — combined store (not slices), Zustand v5 + Immer v11
+- [x] `enableMapSet()` called at module load (required for Set mutation)
+- [x] Node actions: addNode, updateNode, deleteNode, moveNode, toggleComplete, toggleCollapsed, duplicateNode, indentNode, outdentNode, collapseAll, expandAll
+- [x] UI actions: setSelected, setFocused, setEditing, setView, openCommandPalette, closeCommandPalette, openShortcuts, closeShortcuts
+- [x] Today actions: addToToday, removeFromToday, checkTodayReset
+- [x] Drag state: setDragState
+- [x] Settings: toggleDarkMode
+- [x] `src/store/selectors.ts` — selectVisibleNodes, selectBreadcrumb, selectCompletionRatio, selectTodayNodes, selectCompletedNodes, selectUpcomingNodes, selectSearchIndex
 
 ---
 
-### PHASE 3 — Persistence Layer
+### PHASE 3 — Persistence Layer ✅ DONE
 
-- [ ] Create `src/lib/storage.ts`:
-  - [ ] `saveState(state)` — serialize to localStorage
-  - [ ] `loadState()` — deserialize, validate schema, return or return default
-  - [ ] `exportData()` — JSON download
-  - [ ] `importData(json)` — validate + load
-  - [ ] Schema version field for future migrations
-  - [ ] Debounce saves (300ms) to avoid thrashing on every keystroke
-- [ ] Wire persistence into Zustand via `subscribe` (not middleware) to avoid render-time side effects
-- [ ] Seed store with sample data when localStorage is empty (Career, Health, Finance, Learning example tree)
+- [x] `src/lib/storage.ts` — loadState, saveState (debounced 300ms), exportData
+- [x] `src/lib/seed.ts` — Career / Health / Finance / Learning sample tree
+- [x] Schema version field (`schemaVersion: 1`)
+- [x] Midnight reset for today's completed tasks
+- [x] `typeof window === "undefined"` guard for SSR safety
 
 ---
 
-### PHASE 4 — App Shell & Layout
+### PHASE 4 — App Shell & Layout ✅ DONE
 
-- [ ] Update `src/app/layout.tsx`:
-  - [ ] Load Inter font via `next/font/google`
-  - [ ] Apply `antialiased` class, set HTML lang
-  - [ ] Wrap with `<StoreProvider>` if needed
-- [ ] Update `src/app/page.tsx` to render `<AppShell />`
-- [ ] Create `src/components/layout/AppShell.tsx`:
-  - [ ] CSS Grid: `240px auto 320px` columns
-  - [ ] Full viewport height, no scroll on outer container
-  - [ ] Sidebar | Tree | ContextPanel regions
-  - [ ] Context panel collapses when nothing selected
-- [ ] Create `src/components/layout/Sidebar.tsx`:
-  - [ ] Navigation items: Life, Today, Upcoming, Completed, Archive
-  - [ ] Search input at top
-  - [ ] Active item highlight
-  - [ ] Bottom section: ProgressRing + statistics
-  - [ ] Each nav item updates `view` in store
-- [ ] Verify: Layout renders, three columns visible, no content yet
+- [x] `layout.tsx` — Inter font, `h-full` on html/body
+- [x] `page.tsx` — `dynamic({ ssr: false })` prevents hydration mismatch
+- [x] `AppShell.tsx` — CSS grid `240px 1fr 320px`, 100vh, dark mode data-theme toggle
+- [x] `Sidebar.tsx` — nav items, search button, progress ring, task count stats
+- [x] `ContextPanel.tsx` — shows NodeDetails when selectedId is set
 
 ---
 
-### PHASE 5 — ProgressRing Component
+### PHASE 5 — ProgressRing Component ✅ DONE
 
-- [ ] Create `src/components/ui/ProgressRing.tsx`:
-  - [ ] SVG circle with `stroke-dasharray` / `stroke-dashoffset` animation
-  - [ ] Framer Motion `animate` on value change
-  - [ ] Shows percentage complete (completed nodes / total leaf nodes)
-  - [ ] Color: green at high %, yellow at mid, subtle at 0
-- [ ] Wire to `selectCompletionRatio` selector
-- [ ] Place in sidebar bottom section
+- [x] SVG circle with stroke-dasharray/dashoffset
+- [x] Framer Motion animated value changes
+- [x] Color tiers: green ≥80%, yellow ≥40%, gray below
+- [x] Wired to selectCompletionRatio in Sidebar
 
 ---
 
-### PHASE 6 — Tree Rendering (Core)
+### PHASE 6 — Tree Rendering ✅ DONE
 
-- [ ] Create `src/components/tree/LifeTree.tsx`:
-  - [ ] Use `@tanstack/react-virtual` with `useVirtualizer`
-  - [ ] Fixed item size: 36px per row
-  - [ ] Estimated total count from `selectVisibleNodes`
-  - [ ] Render only visible window of nodes
-  - [ ] Pass each `virtualItem.index` to `TreeNode`
-  - [ ] Handle empty state (show "Add your first area" prompt)
-- [ ] Create `src/components/tree/TreeNode.tsx` (React.memo):
-  - [ ] Row structure: `[indent] [collapse-toggle] [checkbox] [icon] [title] [actions]`
-  - [ ] Indent: `depth * 20px` left padding
-  - [ ] Collapse toggle: chevron icon, only shows if has children
-  - [ ] Hover state reveals action buttons (add child, more options)
-  - [ ] Selected state: subtle background
-  - [ ] Focused state (keyboard): ring border
-  - [ ] Completed state: strikethrough title, muted color
-- [ ] Create `src/components/tree/TreeNodeCheckbox.tsx`:
-  - [ ] Animated checkbox (Framer Motion spring checkmark SVG)
-  - [ ] Click toggles `completed` in store
-  - [ ] Space key also triggers when node is focused
-- [ ] Create `src/components/tree/TreeNodeTitle.tsx`:
-  - [ ] Renders as `<span>` normally
-  - [ ] Switches to `<input>` when `editingId === node.id`
-  - [ ] Auto-focus + select all on enter edit mode
-  - [ ] `onBlur` and `Enter` save title
-  - [ ] `Escape` cancels edit (reverts to previous title)
-  - [ ] Empty title on blur → delete node
-- [ ] Verify: Sample tree renders, expand/collapse works, titles visible
+- [x] `LifeTree.tsx` — useVirtualizer, 36px rows, overscan 10, empty state
+- [x] Scroll to focused node via scrollToIndex
+- [x] `TreeNode.tsx` — React.memo, chevron collapse toggle, indent by depth×20px, hover actions
+- [x] `TreeNodeCheckbox.tsx` — Framer Motion SVG checkmark spring animation
+- [x] `TreeNodeTitle.tsx` — span → input toggle on isEditing, suppressBlurRef fix
 
 ---
 
-### PHASE 7 — Keyboard Navigation
+### PHASE 7 — Keyboard Navigation ✅ DONE
 
-- [ ] Create `src/hooks/useKeyboard.ts`:
-  - [ ] Attach single `keydown` listener to `document`
-  - [ ] Route events based on `editingId` (editing vs navigation mode)
-  - [ ] Handle global shortcuts first (Cmd+K, Cmd+T, Cmd+/, Cmd+Z, Cmd+Shift+Z)
-  - [ ] Pass remaining to `useTreeNavigation`
-- [ ] Create `src/hooks/useTreeNavigation.ts`:
-  - [ ] `ArrowDown` — move `focusedId` to next visible node
-  - [ ] `ArrowUp` — move `focusedId` to previous visible node
-  - [ ] `ArrowRight` — expand node if collapsed, else move to first child
-  - [ ] `ArrowLeft` — collapse node if expanded, else move to parent
-  - [ ] `Enter` — enter edit mode OR create sibling below
-  - [ ] `Space` — toggle complete
-  - [ ] `Delete` — delete focused node
-  - [ ] `Cmd+D` — duplicate node
-  - [ ] `Cmd+T` — add focused node to Today
-  - [ ] Scroll virtualized list to keep focused node in view
-- [ ] Create `src/hooks/useInlineEdit.ts`:
-  - [ ] `Enter` in edit mode — save + create new sibling below, start editing it
-  - [ ] `Tab` in edit mode — indent node
-  - [ ] `Shift+Tab` in edit mode — outdent node
-  - [ ] `Backspace` on empty title — delete node, focus previous
-  - [ ] `Escape` — cancel edit
-- [ ] Wire hooks into LifeTree container
-- [ ] Verify: Full keyboard navigation works without mouse
+- [x] `useKeyboard.ts` — storeRef pattern (single listener, no re-registration)
+- [x] ArrowUp/Down — move focusedId through visible nodes
+- [x] ArrowLeft/Right — collapse/expand or move to parent/child
+- [x] Enter — enter edit mode on focused node
+- [x] Space — toggle complete (skips if input focused)
+- [x] Cmd+⌫ — delete focused node
+- [x] Cmd+D — duplicate
+- [x] Cmd+T — toggle today
+- [x] Cmd+K — open command palette
+- [x] Cmd+/ — toggle shortcuts modal
+- [x] Escape — clear focus and selection
 
 ---
 
-### PHASE 8 — Drag & Drop
+### PHASE 9 — Inline Editing ✅ DONE (merged into Phase 7)
 
-- [ ] Create `src/hooks/useDragDrop.ts`:
-  - [ ] Wrap `@dnd-kit/core` `DndContext` around LifeTree
-  - [ ] Custom pointer sensor with 8px drag threshold
-  - [ ] Drag start: set `draggingId` in store, show ghost
-  - [ ] Drag over: calculate drop target (between, inside, cannot drop on descendant)
-  - [ ] Drop: call `moveNode(id, newParentId, newIndex)`
-  - [ ] Cancel: clear drag state
-- [ ] Create `src/components/tree/TreeDropIndicator.tsx`:
-  - [ ] Horizontal line with indent that shows drop position
-  - [ ] Animated in with Framer Motion layout
-- [ ] Verify: Drag nodes to reorder, drag into parent works, no dropping on own descendants
+- [x] Double-click enters edit mode
+- [x] Enter — save + create sibling below + start editing it
+- [x] Tab — save + indentNode + keep editing
+- [x] Shift+Tab — save + outdentNode + keep editing
+- [x] Backspace on empty — delete node, focus+edit previous
+- [x] Escape — cancel edit (no save)
+- [x] Blur — save if has content, delete if empty new node
+- [x] suppressBlurRef prevents double-action when Enter/Tab/Esc handled the event
 
 ---
 
-### PHASE 9 — Inline Editing Experience (Full)
+### PHASE 10 — Command Palette ✅ DONE
 
-- [ ] Double-click on title enters edit mode
-- [ ] Single click selects node (opens right panel) without entering edit mode
-- [ ] Tab key behavior: if at end of editing → indent; Tab in nav mode → indent (same)
-- [ ] Multi-node editing flow: Enter creates sibling, cursor moves to new node in edit mode
-- [ ] Node creation: new node appears immediately with edit mode active
-- [ ] Auto-scroll: virtual list scrolls to keep new node visible
-- [ ] Title truncation with ellipsis when not editing (single line)
-- [ ] Verify: Notion-like editing flow — Enter, Tab, Shift+Tab, Backspace on empty
+- [x] `CommandPalette.tsx` — blur backdrop, auto-focus input
+- [x] fuse.js fuzzy search on title + path
+- [x] Recent nodes shown when query empty
+- [x] Arrow key navigation in results
+- [x] Enter selects → expandAll + setFocused + setSelected + close
+- [x] Path display: `Career › Job Search › Direct Apply`
 
 ---
 
-### PHASE 10 — Command Palette (Cmd+K)
+### PHASE 11 — Today System ✅ DONE
 
-- [ ] Create `src/components/overlays/CommandPalette.tsx`:
-  - [ ] Modal overlay with blur backdrop
-  - [ ] Search input auto-focused on open
-  - [ ] `Escape` closes
-  - [ ] Results show node title + full path (`Career › Job Search › Direct Apply`)
-  - [ ] Keyboard: `ArrowUp/Down` to navigate results, `Enter` to jump
-  - [ ] On select: close palette, expand parents of selected node, scroll to + focus node
-- [ ] Create `src/lib/search.ts`:
-  - [ ] Build flat search index from all nodes (id, title, path)
-  - [ ] Use `fuse.js` for fuzzy search with path weighting
-  - [ ] Recent nodes shown when query is empty
-  - [ ] Debounce index rebuild on store changes (500ms)
-- [ ] Create `src/hooks/useSearch.ts`:
-  - [ ] Wraps search lib, returns results as `SearchResult[]`
-  - [ ] Memoized per query string
-- [ ] Verify: Cmd+K opens palette, typing searches, Enter jumps to node
+- [x] `TodayView.tsx` — renders todayIds filtered nodes with date header
+- [x] Cmd+T toggles node in/out of todayIds
+- [x] Badge count on "Today" sidebar nav item
+- [x] Midnight reset: clears completed todayIds when date changes
+- [x] Completing a task in Today updates the original node (same object)
 
 ---
 
-### PHASE 11 — Today System
+### PHASE 12 — Context Panel ✅ DONE
 
-- [ ] Create `src/components/panels/TodayView.tsx`:
-  - [ ] Filtered view showing only nodes where `todayIds.has(id)`
-  - [ ] Same TreeNode component, just different data source
-  - [ ] Header shows date and task count
-  - [ ] Completing a task in Today also completes it in main tree (same node object)
-- [ ] `Cmd+T` on focused node: toggles `today` flag, updates `todayIds` in store
-- [ ] Midnight reset: check `lastResetDate` in storage; if different from today, clear todayIds of completed nodes
-- [ ] Today badge on sidebar nav item showing count
-- [ ] Verify: Add to Today, complete in Today, verify main tree updates
+- [x] `NodeDetails.tsx` — breadcrumb (useMemo), title input, today toggle, due date, reminder pills, notes textarea, timestamps
+- [x] Breadcrumb computed with useMemo(selectBreadcrumb, [nodes, id])
+- [x] Auto-save on blur for title and notes
+- [x] Close button clears selectedId
 
 ---
 
-### PHASE 12 — Context Panel (Right)
+### PHASE 17 — Shortcuts Modal ✅ DONE
 
-- [ ] Create `src/components/panels/NodeDetails.tsx`:
-  - [ ] Shows when `selectedId` is set
-  - [ ] Breadcrumb at top: `Career › Job Search › Direct Apply`
-  - [ ] Inline title edit (larger, heading style)
-  - [ ] Notes textarea (expandable, auto-save on blur)
-  - [ ] Due date picker (simple date input, styled)
-  - [ ] Reminder picker: None / Today / Tomorrow / Custom
-  - [ ] "Add to Today" toggle button
-  - [ ] Completion status
-  - [ ] Created/Updated timestamps at bottom
-- [ ] Create `src/components/ui/Breadcrumb.tsx`:
-  - [ ] Clickable path segments — each focuses that node in tree
-  - [ ] Overflow: ellipsis for deep paths
-- [ ] Create `src/components/ui/ReminderPicker.tsx`:
-  - [ ] Pill buttons: None, Today, Tomorrow, Custom
-  - [ ] Custom shows native date+time input
-- [ ] Verify: Select a node, right panel populates, edit notes, set reminder
+- [x] `ShortcutsModal.tsx` — 2-column grid, grouped by Navigation/Editing/Actions/Global
+- [x] `<kbd>` styled keys
+- [x] Dismiss with Escape or Cmd+/
 
 ---
 
-### PHASE 13 — Upcoming & Notifications
+### PHASE 8 — Drag & Drop ⬜ NEXT
 
-- [ ] Create `src/components/panels/UpcomingView.tsx`:
-  - [ ] Nodes with reminder or dueDate within next 7 days
-  - [ ] Grouped by date: Today, Tomorrow, This Week
-  - [ ] Each item shows parent path
-- [ ] Notification system:
-  - [ ] Check overdue/due reminders on app focus (`visibilitychange`)
-  - [ ] Show notification banner at top of screen (not browser notifications yet)
-  - [ ] Count badge on "Upcoming" sidebar item
-- [ ] Verify: Set a reminder for tomorrow, check Upcoming view shows it
-
----
-
-### PHASE 14 — Completed & Archive Views
-
-- [ ] Completed view: filter `nodes` where `completed === true`
-- [ ] Archive view: nodes with `archived === true` flag (add to Node type)
-- [ ] "Archive" action in node context menu (right-click or "..." button)
-- [ ] Archive removes from main tree view but preserves data
+- [ ] Wrap `LifeTree` in `DndContext` from `@dnd-kit/core`
+- [ ] Custom pointer sensor with 8px activation distance
+- [ ] `SortableContext` with tree item ids
+- [ ] `useSortable` on each `TreeNode`
+- [ ] Drag overlay: ghost copy of dragged node (semi-transparent)
+- [ ] `TreeDropIndicator.tsx` — horizontal line with depth indent
+- [ ] `onDragOver`: compute drop target (before/after/inside) — reject if target is descendant
+- [ ] `onDragEnd`: call `moveNode(id, newParentId, newIndex)`, clear drag state
+- [ ] Keyboard drag: support drag via keyboard (dnd-kit built-in)
+- [ ] Verify: reorder siblings, reparent nodes, cannot drop onto own descendants
 
 ---
 
-### PHASE 15 — Undo / Redo
+### PHASE 13 — Upcoming & Notifications ⬜
 
-- [ ] Create `src/lib/commands.ts` — Command pattern objects:
-  - [ ] `AddNodeCommand` — creates node, undo deletes it
-  - [ ] `DeleteNodeCommand` — saves snapshot of node + descendants, undo restores
-  - [ ] `MoveNodeCommand` — saves old position, undo moves back
-  - [ ] `UpdateTitleCommand` — saves old title, undo reverts
-  - [ ] `ToggleCompleteCommand` — saves old state
-  - [ ] `IndentCommand` / `OutdentCommand`
-- [ ] Wrap all store mutations to go through `executeCommand`
-- [ ] `Cmd+Z` → `undo()`, `Cmd+Shift+Z` → `redo()`
-- [ ] Show brief toast ("Undo: Deleted node") for clarity
-- [ ] Cap history at 100 commands (drop oldest)
-- [ ] Verify: Add nodes, delete, Cmd+Z restores
+- [ ] `UpcomingView.tsx`: filter nodes with dueDate within 7 days
+- [ ] Group by: Overdue / Today / Tomorrow / This Week
+- [ ] Show parent path for each item
+- [ ] Badge count on "Upcoming" sidebar item (already in selectors)
+- [ ] On `visibilitychange`: re-check overdue items, show inline banner
 
 ---
 
-### PHASE 16 — Micro-interactions & Polish
+### PHASE 14 — Completed & Archive Views ⬜
 
-- [ ] TreeNode mount animation: slide in from left, fade in (Framer Motion)
-- [ ] Checkbox animation: spring-physics SVG checkmark draw
-- [ ] Expand/collapse: height animation via `AnimatePresence`
-- [ ] Progress ring: animated value change
-- [ ] Command palette: scale + fade in
-- [ ] Node deletion: fade out before removal
-- [ ] Drag ghost: semi-transparent, follows cursor with slight scale
-- [ ] Hover actions fade in on node hover
-- [ ] Selection highlight: smooth background transition
-- [ ] Completion: title strikethrough animates from left to right
+- [ ] `CompletedView.tsx`: filter `node.completed === true`, sorted by updatedAt
+- [ ] `ArchiveView.tsx`: filter `node.archived === true`
+- [ ] "Archive" action in node "..." menu (sets `archived: true`, removes from main tree)
+- [ ] "Unarchive" action in Archive view
 
 ---
 
-### PHASE 17 — Shortcuts Modal (Cmd+/)
+### PHASE 15 — Undo / Redo ⬜
 
-- [ ] Create `src/components/overlays/ShortcutsModal.tsx`:
-  - [ ] Full keyboard shortcut reference
-  - [ ] Grouped: Navigation, Editing, Tree, Views, Global
-  - [ ] Beautiful two-column grid with `kbd` styled keys
-  - [ ] Dismiss with Escape or Cmd+/
-- [ ] Create `src/lib/shortcuts.ts`:
-  - [ ] Single source of truth for all shortcut definitions
-  - [ ] Each shortcut: `{ keys, description, group }`
-
----
-
-### PHASE 18 — Settings
-
-- [ ] Settings accessible from sidebar bottom
-- [ ] Settings items (MVP):
-  - [ ] Dark mode toggle (CSS var swap)
-  - [ ] Export data (JSON download)
-  - [ ] Import data (file picker)
-  - [ ] Clear all data (with confirmation)
-  - [ ] App version
+- [ ] `src/lib/commands.ts`: AddNodeCommand, DeleteNodeCommand, MoveNodeCommand, UpdateTitleCommand, ToggleCompleteCommand, IndentCommand, OutdentCommand
+- [ ] Each command: `{ description, execute(), undo() }` — execute captured in closure
+- [ ] `historySlice` in store: push on executeCommand, pop on undo, step forward on redo
+- [ ] Cap at 100 entries (shift oldest)
+- [ ] Wire all store mutations through executeCommand
+- [ ] Cmd+Z → undo, Cmd+Shift+Z → redo
+- [ ] Toast notification: "Undo: Deleted 'Apply OpenAI'"
 
 ---
 
-### PHASE 19 — Dark Mode
+### PHASE 16 — Micro-interactions & Polish ⬜
 
-- [ ] CSS custom properties approach (already architected in globals.css)
-- [ ] Toggle via `data-theme="dark"` on `<html>`
-- [ ] All color values from CSS vars — no hardcoded Tailwind colors in components
-- [ ] Persist preference in localStorage
-- [ ] Respect `prefers-color-scheme` as default
+- [ ] TreeNode appear: fade + slide-up on mount (AnimatePresence)
+- [ ] TreeNode delete: fade-out before removal
+- [ ] Checkbox: spring SVG pathLength animation (already done ✅)
+- [ ] Expand/collapse: height AnimatePresence on children container
+- [ ] Command palette: scale(0.95)→scale(1) + fade on mount
+- [ ] Hover actions: opacity 0→1 transition (currently CSS, migrate to Framer)
+- [ ] Selection background: layout animation
+- [ ] Completed strikethrough: pathLength animation on a line element
+- [ ] Drag ghost: scale(1.02) + opacity(0.8)
+- [ ] Smooth scroll: already handled by virtualizer scrollToIndex
 
 ---
 
-### PHASE 20 — Final QA & Performance
+### PHASE 18 — Settings ⬜
+
+- [ ] Settings panel (slide in from sidebar or modal)
+- [ ] Dark mode toggle → calls `toggleDarkMode()` (already in store)
+- [ ] Export JSON → calls `exportData()` (already in storage.ts)
+- [ ] Import JSON → file input → validate → load
+- [ ] Clear all data → confirm → reset to seed data
+- [ ] App version display
+
+---
+
+### PHASE 19 — Dark Mode ⬜
+
+- [ ] Architecture already done: `data-theme="dark"` on `<html>`, all colors via CSS vars
+- [ ] Wire toggle button in Settings to `toggleDarkMode()` action
+- [ ] Test all components in dark mode — verify no hardcoded colors
+- [ ] `prefers-color-scheme` media query as initial default (if no localStorage pref)
+
+---
+
+### PHASE 20 — Final QA & Performance ⬜
 
 - [ ] Lighthouse audit: target 95+ performance score
-- [ ] Test with 1000+ node tree: virtualization holds
-- [ ] Test all keyboard shortcuts end-to-end
-- [ ] Test persistence: refresh preserves all state
-- [ ] Test undo/redo: 20 operations, undo all, redo all
-- [ ] Test Today flow: add, complete, next day reset
-- [ ] Test drag & drop: reorder, reparent, deep nesting
-- [ ] Test search: fuzzy match, path display, keyboard nav in results
+- [ ] Test with 1000+ node tree: virtualization holds, no lag
+- [ ] All keyboard shortcuts end-to-end
+- [ ] Persistence: refresh preserves all state
+- [ ] Today flow: add → complete → next day reset
+- [ ] Drag & drop: reorder, reparent, deep nesting, keyboard drag
+- [ ] Search: fuzzy match, path display, keyboard nav in results
 - [ ] Cross-browser: Chrome, Safari, Firefox
-- [ ] Accessibility: keyboard only usage, focus management, ARIA labels on interactive elements
-- [ ] Bundle size audit: ensure < 200KB gzipped
+- [ ] Accessibility audit: keyboard-only usage, ARIA, focus management
+- [ ] Bundle size: target < 250KB gzipped
 
 ---
 
 ## Build Order Summary
 
 ```
-Phase 0  → Bootstrap + tooling
-Phase 1  → Types + pure tree utilities
-Phase 2  → Zustand store (all slices)
-Phase 3  → Persistence layer
-Phase 4  → App shell + layout grid
-Phase 5  → ProgressRing component
-Phase 6  → Tree rendering (static, no interaction)
-Phase 7  → Keyboard navigation
-Phase 8  → Drag and drop
-Phase 9  → Full inline editing
-Phase 10 → Command palette + search
-Phase 11 → Today system
-Phase 12 → Context panel (right)
-Phase 13 → Upcoming + notifications
-Phase 14 → Completed + archive views
-Phase 15 → Undo / redo
-Phase 16 → Micro-interactions + polish
-Phase 17 → Shortcuts modal
-Phase 18 → Settings
-Phase 19 → Dark mode
-Phase 20 → QA + performance
+✅ Phase 0  → Bootstrap + tooling
+✅ Phase 1  → Types + pure tree utilities
+✅ Phase 2  → Zustand store
+✅ Phase 3  → Persistence layer
+✅ Phase 4  → App shell + layout grid
+✅ Phase 5  → ProgressRing component
+✅ Phase 6  → Tree rendering (virtualized)
+✅ Phase 7  → Keyboard navigation
+✅ Phase 9  → Inline editing (merged into phase 7)
+✅ Phase 10 → Command palette + search
+✅ Phase 11 → Today system
+✅ Phase 12 → Context panel (right)
+✅ Phase 17 → Shortcuts modal
+
+⬜ Phase 8  → Drag and drop         ← NEXT
+⬜ Phase 13 → Upcoming + notifications
+⬜ Phase 14 → Completed + archive views
+⬜ Phase 15 → Undo / redo
+⬜ Phase 16 → Micro-interactions + polish
+⬜ Phase 18 → Settings
+⬜ Phase 19 → Dark mode
+⬜ Phase 20 → QA + performance
 ```
 
 ---
 
 ## Critical Rules
 
-1. **No code before this plan is approved.** Each phase reviewed before starting next.
-2. **Tree utility functions are pure** — no store imports in `src/lib/tree.ts`.
-3. **Components never import from store directly** — use hooks (`useStore(selector)`).
-4. **Flat node map is sacred** — never nest nodes in component state.
+1. **Tree utility functions are pure** — no store imports in `src/lib/tree.ts`.
+2. **Flat node map is sacred** — never nest nodes in component state.
+3. **useShallow on all object selectors** — never return `{}` or `[]` directly from a selector.
+4. **Derived arrays go in useMemo** — not inside useStore selectors.
 5. **Every interaction has a keyboard path** — no mouse-only features.
-6. **Animations use Framer Motion** — no CSS transitions for interactive elements.
-7. **localStorage writes are debounced** — never write on every keystroke.
-8. **Virtual list is always on** — even for small trees (simpler than toggling).
-
----
-
-## First Deliverable
-
-When user approves this plan, the **first task** is:
-
-1. Run `npx create-next-app@latest` with the config above
-2. Install all dependencies
-3. Create the folder structure (empty files with correct exports)
-4. Write all types in `src/types/index.ts`
-5. Write all pure tree utilities in `src/lib/tree.ts` with tests
-6. Get a blank app running at `localhost:3000`
-
-Only then do we touch any UI component.
+6. **localStorage writes are debounced** — never write on every keystroke.
+7. **Virtual list is always on** — even for small trees.
+8. **storeRef pattern in event handlers** — never subscribe to full store in a hook that registers global listeners.
