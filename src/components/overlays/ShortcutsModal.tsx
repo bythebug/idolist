@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useStore } from "@/store";
 
@@ -47,7 +48,11 @@ export function ShortcutsModal() {
 
   return (
     <>
-      <div
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.15 }}
         onClick={closeShortcuts}
         style={{
           position: "fixed",
@@ -57,7 +62,11 @@ export function ShortcutsModal() {
           zIndex: 100,
         }}
       />
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: -8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: -8 }}
+        transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
         style={{
           position: "fixed",
           top: "50%",
@@ -176,7 +185,7 @@ export function ShortcutsModal() {
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }

@@ -9,12 +9,15 @@ interface Props {
 
 export function TreeNodeCheckbox({ completed, onToggle }: Props) {
   return (
-    <button
+    <motion.button
       onClick={(e) => {
         e.stopPropagation();
         onToggle();
       }}
       aria-label={completed ? "Mark incomplete" : "Mark complete"}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.85 }}
+      transition={{ type: "spring", stiffness: 400, damping: 20 }}
       style={{
         flexShrink: 0,
         width: 18,
@@ -51,6 +54,6 @@ export function TreeNodeCheckbox({ completed, onToggle }: Props) {
           transition={{ duration: 0.2, ease: "easeOut" }}
         />
       </motion.svg>
-    </button>
+    </motion.button>
   );
 }
