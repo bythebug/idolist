@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import Fuse from "fuse.js";
 import { Search } from "lucide-react";
 import { useStore } from "@/store";
+import { useShallow } from "zustand/react/shallow";
 import { selectSearchIndex } from "@/store/selectors";
 import type { SearchResult } from "@/types";
 
@@ -13,7 +14,7 @@ export function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { nodes, rootIds, collapsedIds, closeCommandPalette, setFocused, setSelected, expandAll } =
-    useStore((s) => ({
+    useStore(useShallow((s) => ({
       nodes: s.nodes,
       rootIds: s.rootIds,
       collapsedIds: s.collapsedIds,
@@ -21,7 +22,7 @@ export function CommandPalette() {
       setFocused: s.setFocused,
       setSelected: s.setSelected,
       expandAll: s.expandAll,
-    }));
+    })));
 
   const searchIndex = selectSearchIndex(nodes);
   const fuse = new Fuse(searchIndex, {

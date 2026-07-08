@@ -4,6 +4,7 @@ import { useRef, useEffect } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Plus } from "lucide-react";
 import { useStore } from "@/store";
+import { useShallow } from "zustand/react/shallow";
 import { selectVisibleNodes } from "@/store/selectors";
 import { TreeNode } from "./TreeNode";
 
@@ -11,7 +12,7 @@ export function LifeTree() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { visibleNodes, focusedId, addNode, setFocused, setEditing } =
-    useStore((s) => ({
+    useStore(useShallow((s) => ({
       visibleNodes: selectVisibleNodes(
         s.nodes,
         s.rootIds,
@@ -22,7 +23,7 @@ export function LifeTree() {
       addNode: s.addNode,
       setFocused: s.setFocused,
       setEditing: s.setEditing,
-    }));
+    })));
 
   const rowVirtualizer = useVirtualizer({
     count: visibleNodes.length,

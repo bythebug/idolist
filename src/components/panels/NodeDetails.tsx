@@ -3,6 +3,7 @@
 import { format } from "date-fns";
 import { Sun, Calendar, X } from "lucide-react";
 import { useStore } from "@/store";
+import { useShallow } from "zustand/react/shallow";
 import { selectBreadcrumb } from "@/store/selectors";
 import type { ReminderOption } from "@/types";
 
@@ -19,7 +20,7 @@ const REMINDER_OPTIONS: { value: ReminderOption; label: string }[] = [
 
 export function NodeDetails({ id }: Props) {
   const { node, breadcrumb, todayIds, updateNode, addToToday, removeFromToday, setSelected } =
-    useStore((s) => ({
+    useStore(useShallow((s) => ({
       node: s.nodes[id],
       breadcrumb: selectBreadcrumb(s.nodes, id),
       todayIds: s.todayIds,
@@ -27,7 +28,7 @@ export function NodeDetails({ id }: Props) {
       addToToday: s.addToToday,
       removeFromToday: s.removeFromToday,
       setSelected: s.setSelected,
-    }));
+    })));
 
   if (!node) return null;
 

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useStore } from "@/store";
+import { useShallow } from "zustand/react/shallow";
 import { Sidebar } from "./Sidebar";
 import { ContextPanel } from "./ContextPanel";
 import { LifeTree } from "@/components/tree/LifeTree";
@@ -12,13 +13,13 @@ import { useKeyboard } from "@/hooks/useKeyboard";
 
 export function AppShell() {
   const { view, darkMode, commandPaletteOpen, shortcutsOpen, checkTodayReset } =
-    useStore((s) => ({
+    useStore(useShallow((s) => ({
       view: s.view,
       darkMode: s.darkMode,
       commandPaletteOpen: s.commandPaletteOpen,
       shortcutsOpen: s.shortcutsOpen,
       checkTodayReset: s.checkTodayReset,
-    }));
+    })));
 
   useEffect(() => {
     checkTodayReset();

@@ -10,6 +10,7 @@ import {
   Search,
 } from "lucide-react";
 import { useStore } from "@/store";
+import { useShallow } from "zustand/react/shallow";
 import { selectCompletionRatio, selectTodayCount, selectUpcomingCount } from "@/store/selectors";
 import { ProgressRing } from "@/components/ui/ProgressRing";
 import type { View } from "@/types";
@@ -24,14 +25,14 @@ const NAV_ITEMS: { id: View; label: string; icon: React.ComponentType<{ size?: n
 
 export function Sidebar() {
   const { view, nodes, rootIds, todayIds, setView, openCommandPalette } = useStore(
-    (s) => ({
+    useShallow((s) => ({
       view: s.view,
       nodes: s.nodes,
       rootIds: s.rootIds,
       todayIds: s.todayIds,
       setView: s.setView,
       openCommandPalette: s.openCommandPalette,
-    })
+    }))
   );
 
   const ratio = selectCompletionRatio(nodes);

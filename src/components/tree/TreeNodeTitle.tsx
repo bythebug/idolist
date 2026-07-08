@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, KeyboardEvent } from "react";
 import { useStore } from "@/store";
+import { useShallow } from "zustand/react/shallow";
 
 interface Props {
   id: string;
@@ -17,7 +18,7 @@ export function TreeNodeTitle({ id, title, completed, isEditing }: Props) {
 
   // Only subscribe to actions (stable references), not node data
   const { updateNode, deleteNode, addNode, indentNode, outdentNode, setEditing, setFocused } =
-    useStore((s) => ({
+    useStore(useShallow((s) => ({
       updateNode: s.updateNode,
       deleteNode: s.deleteNode,
       addNode: s.addNode,
@@ -25,7 +26,7 @@ export function TreeNodeTitle({ id, title, completed, isEditing }: Props) {
       outdentNode: s.outdentNode,
       setEditing: s.setEditing,
       setFocused: s.setFocused,
-    }));
+    })));
 
   useEffect(() => {
     if (isEditing && inputRef.current) {

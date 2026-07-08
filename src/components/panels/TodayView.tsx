@@ -2,14 +2,15 @@
 
 import { format } from "date-fns";
 import { useStore } from "@/store";
+import { useShallow } from "zustand/react/shallow";
 import { selectTodayNodes } from "@/store/selectors";
 import { TreeNode } from "@/components/tree/TreeNode";
 
 export function TodayView() {
-  const { nodes, todayIds } = useStore((s) => ({
+  const { nodes, todayIds } = useStore(useShallow((s) => ({
     nodes: s.nodes,
     todayIds: s.todayIds,
-  }));
+  })));
 
   const todayNodes = selectTodayNodes(nodes, todayIds);
 

@@ -3,6 +3,7 @@
 import { memo } from "react";
 import { ChevronRight, Plus, MoreHorizontal } from "lucide-react";
 import { useStore } from "@/store";
+import { useShallow } from "zustand/react/shallow";
 import { TreeNodeCheckbox } from "./TreeNodeCheckbox";
 import { TreeNodeTitle } from "./TreeNodeTitle";
 
@@ -24,7 +25,7 @@ export const TreeNode = memo(function TreeNode({ id, depth }: Props) {
     toggleComplete,
     toggleCollapsed,
     addNode,
-  } = useStore((s) => ({
+  } = useStore(useShallow((s) => ({
     node: s.nodes[id],
     isSelected: s.selectedId === id,
     isFocused: s.focusedId === id,
@@ -36,7 +37,7 @@ export const TreeNode = memo(function TreeNode({ id, depth }: Props) {
     toggleComplete: s.toggleComplete,
     toggleCollapsed: s.toggleCollapsed,
     addNode: s.addNode,
-  }));
+  })));
 
   if (!node) return null;
 
