@@ -1,16 +1,17 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useStore } from "@/store";
 
 const EMOJI_GROUPS = [
-  { label: "Life", emojis: ["🌱", "🌿", "🌳", "🌍", "⭐", "✨", "🔥", "💫", "🎯", "🏆"] },
-  { label: "Work", emojis: ["💼", "🚀", "💡", "🔧", "🛠️", "📊", "📈", "🎨", "💻", "🏗️"] },
+  { label: "Life",   emojis: ["🌱", "🌿", "🌳", "🌍", "⭐", "✨", "🔥", "💫", "🎯", "🏆"] },
+  { label: "Work",   emojis: ["💼", "🚀", "💡", "🔧", "🛠️", "📊", "📈", "🎨", "💻", "🏗️"] },
   { label: "Health", emojis: ["🏃", "💪", "🧘", "🥗", "❤️", "🫀", "🧠", "💊", "🏋️", "🚴"] },
-  { label: "Money", emojis: ["💰", "💵", "📈", "🏦", "💳", "🪙", "💎", "🏠", "📉", "🤑"] },
-  { label: "Learn", emojis: ["📚", "🎓", "🔬", "🧪", "✏️", "📖", "🗺️", "🧩", "🔭", "🎵"] },
+  { label: "Money",  emojis: ["💰", "💵", "📈", "🏦", "💳", "🪙", "💎", "🏠", "📉", "🤑"] },
+  { label: "Learn",  emojis: ["📚", "🎓", "🔬", "🧪", "✏️", "📖", "🗺️", "🧩", "🔭", "🎵"] },
   { label: "People", emojis: ["🤝", "👥", "💬", "🎉", "🎁", "❤️", "🫂", "👨‍👩‍👧", "🏡", "🌸"] },
-  { label: "Tasks", emojis: ["✅", "📌", "📎", "🗒️", "📋", "⚡", "🔑", "🎪", "🌐", "🎭"] },
+  { label: "Tasks",  emojis: ["✅", "📌", "📎", "🗒️", "📋", "⚡", "🔑", "🎪", "🌐", "🎭"] },
 ];
 
 function getDefaultIcon(depth: number, type: string): string {
@@ -28,9 +29,35 @@ interface Props {
 
 export function TreeNodeIcon({ id, icon, depth, type }: Props) {
   const [open, setOpen] = useState(false);
-  const pickerRef = useRef<HTMLDivElement>(null);
+  const [pickerPos, setPickerPos] = useState({ top: 0, left: 0 });
   const btnRef = useRef<HTMLButtonElement>(null);
+  const pickerRef = useRef<HTMLDivElement>(null);
   const updateNode = useStore((s) => s.updateNode);
+
+  // Compute fixed position when opening
+  function openPicker(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (open) { setOpen(false); return; }
+
+    const rect = btnRef.current!.getBoundingClientRect();
+    const pickerWidth = 220;
+    const pickerHeight = 310; // approximate
+
+    let left = rect.left;
+    let top = rect.bottom + 4;
+
+    // Flip left if overflows right edge
+    if (left + pickerWidth > window.innerWidth - 8) {
+      left = rect.right - pickerWidth;
+    }
+    // Flip up if overflows bottom edge
+    if (top + pickerHeight > window.innerHeight - 8) {
+      top = rect.top - pickerHeight - 4;
+    }
+
+    setPickerPos({ top, left });
+    setOpen(true);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -67,14 +94,100 @@ export function TreeNodeIcon({ id, icon, depth, type }: Props) {
   const display = icon ?? getDefaultIcon(depth, type);
   const isDefault = !icon;
 
+  const picker = open && (
+    <div
+      ref={pickerRef}
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        position: "fixed",
+        top: pickerPos.top,
+        left: pickerPos.left,
+        zIndex: 1000,
+        background: "var(--bg-app)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius)",
+        boxShadow: "var(--shadow-overlay)",
+        padding: 8,
+        width: 220,
+      }}
+    >
+      {EMOJI_GROUPS.map((group) => (
+        <div key={group.label} style={{ marginBottom: 6 }}>
+          <div
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              color: "var(--text-muted)",
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              marginBottom: 3,
+              paddingLeft: 2,
+            }}
+          >
+            {group.label}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+            {group.emojis.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => handleSelect(emoji)}
+                style={{
+                  width: 28,
+                  height: 28,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: icon === emoji ? "var(--accent-subtle)" : "transparent",
+                  border: icon === emoji ? "1px solid var(--accent)" : "1px solid transparent",
+                  borderRadius: 5,
+                  cursor: "pointer",
+                  fontSize: 14,
+                  padding: 0,
+                  transition: "background 80ms",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = "var(--bg-node-selected)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background =
+                    icon === emoji ? "var(--accent-subtle)" : "transparent";
+                }}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {icon && (
+        <button
+          onClick={handleClear}
+          style={{
+            marginTop: 4,
+            width: "100%",
+            padding: "4px 0",
+            background: "transparent",
+            border: "1px solid var(--border-subtle)",
+            borderRadius: 5,
+            cursor: "pointer",
+            fontSize: 11,
+            color: "var(--text-muted)",
+            fontFamily: "inherit",
+          }}
+        >
+          Clear icon
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div style={{ position: "relative", flexShrink: 0 }}>
       <button
         ref={btnRef}
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen((v) => !v);
-        }}
+        onClick={openPicker}
         aria-label="Set node icon"
         title="Set icon"
         style={{
@@ -103,94 +216,7 @@ export function TreeNodeIcon({ id, icon, depth, type }: Props) {
         {display}
       </button>
 
-      {open && (
-        <div
-          ref={pickerRef}
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            position: "absolute",
-            top: "calc(100% + 4px)",
-            left: 0,
-            zIndex: 200,
-            background: "var(--bg-app)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius)",
-            boxShadow: "var(--shadow-overlay)",
-            padding: 8,
-            width: 220,
-          }}
-        >
-          {EMOJI_GROUPS.map((group) => (
-            <div key={group.label} style={{ marginBottom: 6 }}>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 600,
-                  color: "var(--text-muted)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.06em",
-                  marginBottom: 3,
-                  paddingLeft: 2,
-                }}
-              >
-                {group.label}
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-                {group.emojis.map((emoji) => (
-                  <button
-                    key={emoji}
-                    onClick={() => handleSelect(emoji)}
-                    style={{
-                      width: 28,
-                      height: 28,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      background: icon === emoji ? "var(--accent-subtle)" : "transparent",
-                      border: icon === emoji ? "1px solid var(--accent)" : "1px solid transparent",
-                      borderRadius: 5,
-                      cursor: "pointer",
-                      fontSize: 14,
-                      padding: 0,
-                      transition: "background 80ms",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.background =
-                        "var(--bg-node-selected)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.background =
-                        icon === emoji ? "var(--accent-subtle)" : "transparent";
-                    }}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-
-          {icon && (
-            <button
-              onClick={handleClear}
-              style={{
-                marginTop: 4,
-                width: "100%",
-                padding: "4px 0",
-                background: "transparent",
-                border: "1px solid var(--border-subtle)",
-                borderRadius: 5,
-                cursor: "pointer",
-                fontSize: 11,
-                color: "var(--text-muted)",
-                fontFamily: "inherit",
-              }}
-            >
-              Clear icon
-            </button>
-          )}
-        </div>
-      )}
+      {typeof document !== "undefined" && createPortal(picker, document.body)}
     </div>
   );
 }
