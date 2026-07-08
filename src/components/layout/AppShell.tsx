@@ -13,6 +13,7 @@ import { ArchiveView } from "@/components/panels/ArchiveView";
 import { CommandPalette } from "@/components/overlays/CommandPalette";
 import { ShortcutsModal } from "@/components/overlays/ShortcutsModal";
 import { useKeyboard } from "@/hooks/useKeyboard";
+import { Toast } from "@/components/ui/Toast";
 
 export function AppShell() {
   const { view, darkMode, commandPaletteOpen, shortcutsOpen, checkTodayReset } =
@@ -69,6 +70,7 @@ export function AppShell() {
 
       {commandPaletteOpen && <CommandPalette />}
       {shortcutsOpen && <ShortcutsModal />}
+      <Toast />
     </div>
   );
 }

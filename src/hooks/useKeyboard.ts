@@ -33,11 +33,13 @@ export function useKeyboard() {
       }
       if (meta && e.key === "z" && !e.shiftKey) {
         e.preventDefault();
-        return; // Phase 15: undo
+        s.undo();
+        return;
       }
       if (meta && e.key === "z" && e.shiftKey) {
         e.preventDefault();
-        return; // Phase 15: redo
+        s.redo();
+        return;
       }
 
       // Skip tree navigation while a title input is focused
