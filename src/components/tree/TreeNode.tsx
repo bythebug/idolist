@@ -1,7 +1,8 @@
 "use client";
 
-import { memo } from "react";
-import { ChevronRight, Plus, MoreHorizontal } from "lucide-react";
+import { memo, useCallback } from "react";
+import { ChevronRight, Plus, MoreHorizontal, GripVertical } from "lucide-react";
+import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
 import { TreeNodeCheckbox } from "./TreeNodeCheckbox";
@@ -10,9 +11,11 @@ import { TreeNodeTitle } from "./TreeNodeTitle";
 interface Props {
   id: string;
   depth: number;
+  isDragging?: boolean;
+  isDropInside?: boolean;
 }
 
-export const TreeNode = memo(function TreeNode({ id, depth }: Props) {
+export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropInside }: Props) {
   const {
     node,
     isSelected,
@@ -39,6 +42,19 @@ export const TreeNode = memo(function TreeNode({ id, depth }: Props) {
     addNode: s.addNode,
   })));
 
+  const draggable = useDraggable({ id });
+  const droppable = useDroppable({ id });
+
+  // Both the drag source handle and the drop target ref point to the same row
+  const setRowRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      droppable.setNodeRef(el);
+    },
+    // droppable.setNodeRef is stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   if (!node) return null;
 
   const hasChildren = node.childIds.length > 0;
@@ -48,10 +64,6 @@ export const TreeNode = memo(function TreeNode({ id, depth }: Props) {
     e.stopPropagation();
     setFocused(id);
     setSelected(id);
-    if (isEditing) return;
-    if (isSelected) {
-      // second click could open editing — handled by double click
-    }
   }
 
   function handleDoubleClick(e: React.MouseEvent) {
@@ -62,7 +74,6 @@ export const TreeNode = memo(function TreeNode({ id, depth }: Props) {
   function handleAddChild(e: React.MouseEvent) {
     e.stopPropagation();
     const newId = addNode(id);
-    // Expand parent if collapsed
     if (isCollapsed) toggleCollapsed(id);
     setFocused(newId);
     setEditing(newId);
@@ -72,6 +83,7 @@ export const TreeNode = memo(function TreeNode({ id, depth }: Props) {
 
   return (
     <div
+      ref={setRowRef}
       role="treeitem"
       aria-selected={isSelected}
       aria-expanded={hasChildren ? !isCollapsed : undefined}
@@ -89,16 +101,47 @@ export const TreeNode = memo(function TreeNode({ id, depth }: Props) {
         margin: "0 4px",
         background: isSelected
           ? "var(--bg-node-selected)"
+          : isDropInside
+          ? "var(--accent-subtle)"
           : "transparent",
-        outline: showFocusRing
+        outline: isDropInside
+          ? "2px solid var(--accent)"
+          : showFocusRing
           ? "2px solid var(--accent)"
           : "none",
         outlineOffset: -2,
         transition: "background 100ms",
+        opacity: isDragging ? 0.3 : 1,
         position: "relative",
       }}
       className="tree-node-row"
     >
+      {/* Drag handle — visible on hover */}
+      <div
+        ref={draggable.setNodeRef}
+        {...draggable.listeners}
+        {...draggable.attributes}
+        className="drag-handle"
+        title="Drag to reorder"
+        style={{
+          flexShrink: 0,
+          width: 12,
+          height: 20,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: draggable.isDragging ? "grabbing" : "grab",
+          color: "var(--text-muted)",
+          opacity: 0,
+          transition: "opacity 100ms",
+          marginLeft: -4,
+          marginRight: 0,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <GripVertical size={11} />
+      </div>
+
       {/* Collapse toggle */}
       <button
         onClick={(e) => {
