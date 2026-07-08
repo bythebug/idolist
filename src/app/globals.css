@@ -2,61 +2,65 @@
 
 /* ─── Design Tokens ─────────────────────────────────────────── */
 /*
-   Color philosophy: Apple Human Interface Guidelines
-   · Surfaces: Apple's system background tiers (secondary for chrome, primary for canvas)
-   · Text: Apple's label hierarchy — label / secondaryLabel / tertiaryLabel / placeholderText
-   · Semantic: Apple's system colors — Blue, Green, Orange, Red
-   · Font: -apple-system resolves to SF Pro on Mac, best system font everywhere else
+   Notion-style color philosophy:
+   · Warm neutrals throughout — text based on #37352F, not pure black
+   · Surfaces differ only slightly — sidebar is just barely off-white
+   · Borders are gossamer rgba lines, not solid gray stripes
+   · Accent is a calm blue (#2383E2), not neon
+   · Semantic colors are muted/earthy, not iOS-bright
+   · Radius is minimal (3–8px) — Notion is sharper than Apple
 */
 :root {
-  /* ── Surfaces — Apple system background (light) */
-  --bg-app:              #FFFFFF;      /* systemBackground */
-  --bg-sidebar:          #F2F2F7;      /* secondarySystemBackground */
-  --bg-panel:            #F2F2F7;      /* secondarySystemBackground */
+  /* ── Surfaces */
+  --bg-app:              #FFFFFF;
+  --bg-sidebar:          #F7F7F5;       /* barely warm off-white — Notion sidebar */
+  --bg-panel:            #FBFBFA;       /* right panel — almost white */
 
-  /* Node states */
-  --bg-node-hover:       rgba(0, 0, 0, 0.04);
-  --bg-node-selected:    rgba(0, 0, 0, 0.09);
+  /* Node / row states — warm tint, not cold black */
+  --bg-node-hover:       rgba(55, 53, 47, 0.06);
+  --bg-node-selected:    rgba(55, 53, 47, 0.11);
 
-  /* ── Text — Apple label colors (light) */
-  --text-primary:        #000000;      /* label */
-  --text-secondary:      #3C3C43;      /* secondaryLabel base (without alpha) */
-  --text-muted:          #8E8E93;      /* tertiaryLabel / systemGray */
-  --text-placeholder:    #C7C7CC;      /* placeholderText / systemGray3 */
-  --text-completed:      #AEAEB2;      /* systemGray2 */
+  /* ── Text — warm near-black hierarchy */
+  --text-primary:        #37352F;       /* Notion's signature warm near-black */
+  --text-secondary:      #6F6E69;       /* #37352F @ ~65% opacity on white */
+  --text-muted:          #9B9A97;       /* subdued — dates, counts, labels */
+  --text-placeholder:    #C4C3BE;
+  --text-completed:      #BEBDB8;
 
-  /* ── Borders — Apple separator */
-  --border:              #C6C6C8;      /* separator */
-  --border-subtle:       #E5E5EA;      /* systemGray5 */
-  --border-focus:        rgba(0, 122, 255, 0.4);
+  /* ── Borders — gossamer, barely-there */
+  --border:              rgba(55, 53, 47, 0.09);
+  --border-subtle:       rgba(55, 53, 47, 0.05);
+  --border-focus:        rgba(35, 131, 226, 0.45);
 
-  /* ── Accent — Apple Blue */
-  --accent:              #007AFF;
-  --accent-hover:        #0071E3;
-  --accent-subtle:       rgba(0, 122, 255, 0.10);
+  /* ── Accent — Notion blue (calm, not neon) */
+  --accent:              #2383E2;
+  --accent-hover:        #0F73D9;
+  --accent-subtle:       rgba(35, 131, 226, 0.10);
 
-  /* ── Semantic — Apple system colors (light) */
-  --success:             #34C759;      /* systemGreen */
-  --success-subtle:      rgba(52, 199, 89, 0.12);
-  --warning:             #FF9500;      /* systemOrange */
-  --warning-subtle:      rgba(255, 149, 0, 0.10);
-  --warning-subtle-2:    rgba(255, 149, 0, 0.18);
-  --danger:              #FF3B30;      /* systemRed */
-  --danger-subtle:       rgba(255, 59, 48, 0.08);
-  --danger-subtle-2:     rgba(255, 59, 48, 0.10);
-  --danger-subtle-3:     rgba(255, 59, 48, 0.14);
-  --danger-subtle-4:     rgba(255, 59, 48, 0.20);
+  /* ── Semantic — earthy/muted Notion palette */
+  --success:             #0F7B6C;
+  --success-subtle:      rgba(15, 123, 108, 0.10);
+  --warning:             #D9730D;
+  --warning-subtle:      rgba(217, 115, 13, 0.10);
+  --warning-subtle-2:    rgba(217, 115, 13, 0.18);
+  --danger:              #E03E3E;
+  --danger-subtle:       rgba(224, 62, 62, 0.07);
+  --danger-subtle-2:     rgba(224, 62, 62, 0.10);
+  --danger-subtle-3:     rgba(224, 62, 62, 0.14);
+  --danger-subtle-4:     rgba(224, 62, 62, 0.20);
 
-  /* ── Radius — Apple rounded corners */
-  --radius-sm:           6px;
-  --radius:              10px;
-  --radius-lg:           14px;
+  /* ── Radius — minimal, Notion-like */
+  --radius-sm:           3px;
+  --radius:              5px;
+  --radius-lg:           8px;
 
-  /* ── Shadows */
+  /* ── Shadows — soft, barely present in light mode */
   --shadow-sm:           0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow:              0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.05);
-  --shadow-lg:           0 8px 24px rgba(0, 0, 0, 0.10), 0 0 0 1px rgba(0, 0, 0, 0.06);
-  --shadow-overlay:      0 16px 48px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --shadow:              0 3px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-lg:           0 8px 24px rgba(0, 0, 0, 0.10), 0 2px 6px rgba(0, 0, 0, 0.05);
+  --shadow-overlay:      rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
+                         rgba(15, 15, 15, 0.10) 0px 3px 6px,
+                         rgba(15, 15, 15, 0.20) 0px 9px 24px;
 
   /* Layout */
   --sidebar-width:       210px;
@@ -64,54 +68,55 @@
 }
 
 [data-theme="dark"] {
-  /* ── Surfaces — Apple dark (sidebar recedes, panel floats) */
-  --bg-app:              #1C1C1E;      /* secondarySystemBackground dark */
-  --bg-sidebar:          #000000;      /* systemBackground dark — recedes to black */
-  --bg-panel:            #2C2C2E;      /* tertiarySystemBackground dark */
+  /* ── Surfaces — Notion dark (very dark, slightly layered) */
+  --bg-app:              #191919;       /* Notion dark primary */
+  --bg-sidebar:          #202020;       /* sidebar just slightly lighter */
+  --bg-panel:            #222222;
 
-  /* Node states */
-  --bg-node-hover:       rgba(255, 255, 255, 0.06);
-  --bg-node-selected:    rgba(255, 255, 255, 0.12);
+  --bg-node-hover:       rgba(255, 255, 255, 0.055);
+  --bg-node-selected:    rgba(255, 255, 255, 0.10);
 
-  /* ── Text — Apple label colors (dark) */
-  --text-primary:        #FFFFFF;      /* label dark */
-  --text-secondary:      #98989D;      /* secondaryLabel dark (EBEBF5 @ 60%) */
-  --text-muted:          #636366;      /* tertiaryLabel dark / systemGray dark */
-  --text-placeholder:    #3A3A3C;      /* systemGray6 dark */
-  --text-completed:      #48484A;      /* systemGray5 dark */
+  /* ── Text — white with opacity, not flat gray values */
+  --text-primary:        rgba(255, 255, 255, 0.81);   /* ≈ #CFCFCF */
+  --text-secondary:      rgba(255, 255, 255, 0.45);   /* ≈ #737373 */
+  --text-muted:          rgba(255, 255, 255, 0.28);   /* ≈ #474747 */
+  --text-placeholder:    rgba(255, 255, 255, 0.14);
+  --text-completed:      rgba(255, 255, 255, 0.18);
 
-  /* ── Borders — Apple separator (dark) */
-  --border:              #38383A;      /* separator dark */
-  --border-subtle:       #2C2C2E;      /* systemGray6 dark */
-  --border-focus:        rgba(10, 132, 255, 0.5);
+  /* ── Borders — nearly invisible in dark */
+  --border:              rgba(255, 255, 255, 0.09);
+  --border-subtle:       rgba(255, 255, 255, 0.055);
+  --border-focus:        rgba(82, 156, 202, 0.50);
 
-  /* ── Accent — Apple Blue (dark) */
-  --accent:              #0A84FF;
-  --accent-hover:        #409CFF;
-  --accent-subtle:       rgba(10, 132, 255, 0.15);
+  /* ── Accent — softer blue for dark bg */
+  --accent:              #529CCA;
+  --accent-hover:        #6DB3DF;
+  --accent-subtle:       rgba(82, 156, 202, 0.15);
 
-  /* ── Semantic — Apple system colors (dark) */
-  --success:             #30D158;      /* systemGreen dark */
-  --success-subtle:      rgba(48, 209, 88, 0.14);
-  --warning:             #FF9F0A;      /* systemOrange dark */
-  --warning-subtle:      rgba(255, 159, 10, 0.12);
-  --warning-subtle-2:    rgba(255, 159, 10, 0.20);
-  --danger:              #FF453A;      /* systemRed dark */
-  --danger-subtle:       rgba(255, 69, 58, 0.10);
-  --danger-subtle-2:     rgba(255, 69, 58, 0.13);
-  --danger-subtle-3:     rgba(255, 69, 58, 0.18);
-  --danger-subtle-4:     rgba(255, 69, 58, 0.24);
+  /* ── Semantic — lightened for dark bg */
+  --success:             #4DAB9A;
+  --success-subtle:      rgba(77, 171, 154, 0.14);
+  --warning:             #FFA344;
+  --warning-subtle:      rgba(255, 163, 68, 0.12);
+  --warning-subtle-2:    rgba(255, 163, 68, 0.20);
+  --danger:              #FF7369;
+  --danger-subtle:       rgba(255, 115, 105, 0.10);
+  --danger-subtle-2:     rgba(255, 115, 105, 0.13);
+  --danger-subtle-3:     rgba(255, 115, 105, 0.18);
+  --danger-subtle-4:     rgba(255, 115, 105, 0.24);
 
   /* ── Shadows */
-  --shadow-sm:           0 1px 3px rgba(0, 0, 0, 0.5);
-  --shadow:              0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
-  --shadow-lg:           0 8px 24px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.07);
-  --shadow-overlay:      0 16px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-sm:           0 1px 3px rgba(0, 0, 0, 0.40);
+  --shadow:              0 3px 8px rgba(0, 0, 0, 0.40), 0 1px 2px rgba(0, 0, 0, 0.30);
+  --shadow-lg:           0 8px 24px rgba(0, 0, 0, 0.50), 0 2px 6px rgba(0, 0, 0, 0.30);
+  --shadow-overlay:      rgba(15, 15, 15, 0.30) 0px 0px 0px 1px,
+                         rgba(15, 15, 15, 0.40) 0px 3px 6px,
+                         rgba(15, 15, 15, 0.60) 0px 9px 24px;
 }
 
 /* ─── Tailwind theme mapping ─────────────────────────────────── */
 @theme inline {
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
 /* ─── Base ───────────────────────────────────────────────────── */
@@ -127,12 +132,11 @@ html, body {
 body {
   background: var(--bg-app);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
-  letter-spacing: -0.01em;
 }
 
 /* ─── Scrollbar ──────────────────────────────────────────────── */
@@ -144,20 +148,29 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: rgba(55, 53, 47, 0.18);
   border-radius: 99px;
 }
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+}
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: rgba(55, 53, 47, 0.30);
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 /* ─── Focus ─────────────────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--border-focus);
   outline-offset: 2px;
 }
 
 ::selection {
-  background: var(--accent-subtle);
+  background: rgba(35, 131, 226, 0.15);
   color: var(--text-primary);
+}
+[data-theme="dark"] ::selection {
+  background: rgba(82, 156, 202, 0.20);
 }
