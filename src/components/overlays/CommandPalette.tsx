@@ -89,20 +89,20 @@ export function CommandPalette() {
           background: "rgba(0,0,0,0.3)",
           backdropFilter: "blur(4px)",
           zIndex: 100,
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "center",
+          paddingTop: "18vh",
         }}
-      />
-
-      {/* Modal */}
+      >
+      {/* Modal — child of backdrop so flexbox centers it; stops click from closing */}
       <motion.div
         initial={{ opacity: 0, scale: 0.96, y: -8 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: -8 }}
         transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+        onClick={(e) => e.stopPropagation()}
         style={{
-          position: "fixed",
-          top: "20%",
-          left: "50%",
-          transform: "translateX(-50%)",
           width: 520,
           maxWidth: "calc(100vw - 32px)",
           background: "var(--bg-app)",
@@ -226,6 +226,7 @@ export function CommandPalette() {
           <span>↵ open</span>
           <span>esc close</span>
         </div>
+      </motion.div>
       </motion.div>
     </>
   );
