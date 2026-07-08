@@ -132,6 +132,14 @@ export function useKeyboard() {
           }
           break;
         }
+        case "e": {
+          if (!meta) {
+            e.preventDefault();
+            // E opens NodeDetails panel for the focused node
+            s.setSelected(s.selectedId === focusedId ? null : focusedId);
+          }
+          break;
+        }
         case "Escape": {
           s.setFocused(null);
           s.setSelected(null);

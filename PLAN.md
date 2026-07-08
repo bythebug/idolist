@@ -30,13 +30,12 @@ LifeOS is a personal operating system — a single-page application built around
 ✅ Phase 18 — Settings panel (export, import, clear, dark mode toggle)
 ✅ Phase 19 — Dark mode (CSS vars, animated toggle, persisted)
 ✅ Phase 20 — QA & Performance (37 tests, 276KB gzipped, 0 TS errors)
-
-⬜ Phase 21 — Node icons / emoji picker ← NEXT
-⬜ Phase 22 — Multi-column tree (Progress, Today, Due date columns)
-⬜ Phase 23 — Right panel redesign (Today list + Life Progress stats)
-⬜ Phase 24 — Left sidebar redesign (new nav items, sparkline, area tags)
-⬜ Phase 25 — Tree toolbar (breadcrumb header, search bar)
-⬜ Phase 26 — Visual design pass (typography, spacing, colors to match mockup)
+✅ Phase 21 — Node icons / emoji picker (TreeNodeIcon, 7-group popover, seed icons)
+✅ Phase 22 — Multi-column tree (Progress bar, Today sun toggle, Due date columns)
+✅ Phase 23 — Right panel redesign (TodayPanel + LifeProgressPanel, NodeDetails overlay)
+✅ Phase 24 — Left sidebar redesign (Life/Today/Inbox/Search/Graph/Calendar/Notes, Areas section)
+✅ Phase 25 — Tree toolbar ("My Life" h1 + subtitle, "New Item" bottom button)
+✅ Phase 26 — Visual design pass (40px rows, depth-0 bold, 210/260px panel widths)
 ```
 
 ---
@@ -431,12 +430,12 @@ Final polish to match the mockup's aesthetic.
 ✅ Phase 19 → Dark mode
 ✅ Phase 20 → QA + performance
 
-⬜ Phase 21 → Node icons / emoji picker      ← NEXT
-⬜ Phase 22 → Multi-column tree (Progress, Today, Due)
-⬜ Phase 23 → Right panel redesign (Today list + Life Progress)
-⬜ Phase 24 → Left sidebar redesign (new nav, sparkline, area tags)
-⬜ Phase 25 → Tree toolbar (breadcrumb, subtitle, search, drill-in)
-⬜ Phase 26 → Visual design pass (match mockup proportions + typography)
+✅ Phase 21 → Node icons / emoji picker
+✅ Phase 22 → Multi-column tree (Progress, Today, Due)
+✅ Phase 23 → Right panel redesign (Today list + Life Progress)
+✅ Phase 24 → Left sidebar redesign (new nav, sparkline, area tags)
+✅ Phase 25 → Tree toolbar (subtitle, New Item button)
+✅ Phase 26 → Visual design pass (match mockup proportions + typography)
 ```
 
 ---
