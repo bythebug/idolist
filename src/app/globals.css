@@ -13,8 +13,8 @@
 :root {
   /* ── Surfaces */
   --bg-app:              #FFFFFF;
-  --bg-sidebar:          #FAFAF9;       /* barely warm — 5-step delta, no hard edge */
-  --bg-panel:            #FDFDFB;       /* right panel — almost same as canvas */
+  --bg-sidebar:          #FFFFFF;
+  --bg-panel:            #FFFFFF;
 
   /* Node / row states — warm tint, not cold black */
   --bg-node-hover:       rgba(55, 53, 47, 0.06);
@@ -69,9 +69,9 @@
 
 [data-theme="dark"] {
   /* ── Surfaces — Notion dark (very dark, slightly layered) */
-  --bg-app:              #191919;       /* Notion dark primary */
-  --bg-sidebar:          #202020;       /* sidebar just slightly lighter */
-  --bg-panel:            #222222;
+  --bg-app:              #191919;
+  --bg-sidebar:          #191919;
+  --bg-panel:            #191919;
 
   --bg-node-hover:       rgba(255, 255, 255, 0.055);
   --bg-node-selected:    rgba(255, 255, 255, 0.10);
