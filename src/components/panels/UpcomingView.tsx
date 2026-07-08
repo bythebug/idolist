@@ -135,12 +135,12 @@ function UpcomingItem({ node, daysUntil, nodes }: ItemProps) {
         ) : daysUntil === 0 ? (
           <>
             <Clock size={10} />
-            Today
+            Today{node.dueTime && ` · ${format(new Date(`1970-01-01T${node.dueTime}`), "h:mma")}`}
           </>
         ) : daysUntil === 1 ? (
           <>
             <Calendar size={10} />
-            Tomorrow
+            Tomorrow{node.dueTime && ` · ${format(new Date(`1970-01-01T${node.dueTime}`), "h:mma")}`}
           </>
         ) : (
           <>
@@ -148,6 +148,7 @@ function UpcomingItem({ node, daysUntil, nodes }: ItemProps) {
             {node.dueDate
               ? format(new Date(node.dueDate), "MMM d")
               : `In ${daysUntil}d`}
+            {node.dueTime && ` · ${format(new Date(`1970-01-01T${node.dueTime}`), "h:mma")}`}
           </>
         )}
       </div>
