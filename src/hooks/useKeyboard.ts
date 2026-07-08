@@ -56,6 +56,16 @@ export function useKeyboard() {
         return;
       }
 
+      // Space with no focused node in Today view → open quick-add
+      if (!focusedId && e.key === " " && view === "today") {
+        const active = document.activeElement;
+        if (!active || (active.tagName !== "INPUT" && active.tagName !== "TEXTAREA")) {
+          e.preventDefault();
+          window.dispatchEvent(new CustomEvent("today:quickadd"));
+        }
+        return;
+      }
+
       if (!focusedId) return;
 
       switch (e.key) {
@@ -99,7 +109,6 @@ export function useKeyboard() {
           break;
         }
         case " ": {
-          // Only intercept Space when tree is focused, not inside inputs
           const active = document.activeElement;
           if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) break;
           e.preventDefault();

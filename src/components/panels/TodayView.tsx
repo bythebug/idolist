@@ -1,18 +1,52 @@
 "use client";
 
+import { useEffect, useRef, useState, useMemo } from "react";
 import { format } from "date-fns";
+import { Plus } from "lucide-react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
 import { selectTodayNodes } from "@/store/selectors";
 import { TreeNode } from "@/components/tree/TreeNode";
+import { parseTask } from "@/lib/nlp";
 
 export function TodayView() {
-  const { nodes, todayIds } = useStore(useShallow((s) => ({
-    nodes: s.nodes,
-    todayIds: s.todayIds,
-  })));
+  const { nodes, todayIds, addToInbox, addToToday, updateNode } = useStore(
+    useShallow((s) => ({
+      nodes: s.nodes,
+      todayIds: s.todayIds,
+      addToInbox: s.addToInbox,
+      addToToday: s.addToToday,
+      updateNode: s.updateNode,
+    }))
+  );
 
   const todayNodes = selectTodayNodes(nodes, todayIds);
+  const [draft, setDraft] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const parsed = useMemo(() => parseTask(draft), [draft]);
+
+  // Listen for Space key trigger from useKeyboard when no node is focused
+  useEffect(() => {
+    function onQuickAdd() {
+      inputRef.current?.focus();
+    }
+    window.addEventListener("today:quickadd", onQuickAdd);
+    return () => window.removeEventListener("today:quickadd", onQuickAdd);
+  }, []);
+
+  function submit() {
+    if (!draft.trim()) return;
+    const id = addToInbox(parsed.title);
+    if (parsed.dueDate) updateNode(id, { dueDate: parsed.dueDate, dueTime: parsed.dueTime ?? null });
+    addToToday(id);
+    setDraft("");
+    inputRef.current?.focus();
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter") { e.preventDefault(); submit(); }
+    if (e.key === "Escape") { setDraft(""); inputRef.current?.blur(); }
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -36,15 +70,62 @@ export function TodayView() {
         >
           Today
         </h1>
-        <p
-          style={{
-            fontSize: 12,
-            color: "var(--text-muted)",
-            margin: "2px 0 0",
-          }}
-        >
+        <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
           {format(new Date(), "EEEE, MMMM d")} · {todayNodes.length} tasks
         </p>
+      </div>
+
+      {/* Quick-add row */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "6px 12px",
+          borderBottom: "1px solid var(--border-subtle)",
+          flexShrink: 0,
+        }}
+      >
+        <Plus size={13} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+        <input
+          ref={inputRef}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Add task to today… (Space)"
+          style={{
+            flex: 1,
+            border: "none",
+            background: "transparent",
+            outline: "none",
+            fontSize: 13,
+            color: "var(--text-primary)",
+            fontFamily: "inherit",
+          }}
+        />
+        {parsed.dateLabel && draft.trim() && (
+          <span style={{ fontSize: 11, color: "var(--accent)", flexShrink: 0 }}>
+            {parsed.dateLabel}
+          </span>
+        )}
+        {draft.trim() && (
+          <button
+            onClick={submit}
+            style={{
+              background: "var(--accent)",
+              border: "none",
+              borderRadius: 5,
+              padding: "3px 9px",
+              fontSize: 12,
+              color: "#fff",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              flexShrink: 0,
+            }}
+          >
+            Add
+          </button>
+        )}
       </div>
 
       {/* Tasks */}
@@ -60,7 +141,7 @@ export function TodayView() {
               fontSize: 13,
             }}
           >
-            No tasks for today. Press ⌘T on any task to add it.
+            No tasks for today. Press Space to add one.
           </div>
         ) : (
           todayNodes.map((node) => (
