@@ -255,10 +255,17 @@ function InboxItem({
       </div>
 
       {/* Due date or creation date */}
-      <span style={{ fontSize: 11, color: node.dueDate ? "var(--accent)" : "var(--text-muted)", flexShrink: 0 }}>
-        {node.dueDate
-          ? format(new Date(node.dueDate), "MMM d")
-          : format(new Date(node.createdAt), "MMM d")}
+      <span style={{ fontSize: 11, color: node.dueDate ? "var(--accent)" : "var(--text-muted)", flexShrink: 0, textAlign: "right" }}>
+        {node.dueDate ? (
+          <>
+            {format(new Date(node.dueDate), "MMM d")}
+            {node.dueTime && (
+              <span style={{ opacity: 0.8 }}> · {format(new Date(`1970-01-01T${node.dueTime}`), "h:mma")}</span>
+            )}
+          </>
+        ) : (
+          format(new Date(node.createdAt), "MMM d")
+        )}
       </span>
 
       {/* Hover actions */}

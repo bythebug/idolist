@@ -21,7 +21,7 @@ interface Props {
 // Column widths — must match the header in LifeTree
 export const COL_PROGRESS = 96;
 export const COL_TODAY = 40;
-export const COL_DUE = 72;
+export const COL_DUE = 100;
 
 export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropInside }: Props) {
   const {
