@@ -56,16 +56,6 @@ export function useKeyboard() {
         return;
       }
 
-      // Space with no focused node in Today view → open quick-add
-      if (!focusedId && e.key === " " && view === "today") {
-        const active = document.activeElement;
-        if (!active || (active.tagName !== "INPUT" && active.tagName !== "TEXTAREA")) {
-          e.preventDefault();
-          window.dispatchEvent(new CustomEvent("today:quickadd"));
-        }
-        return;
-      }
-
       if (!focusedId) return;
 
       switch (e.key) {
