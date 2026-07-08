@@ -2,53 +2,52 @@
 
 /* ─── Design Tokens ─────────────────────────────────────────── */
 /*
-   Color philosophy:
-   · Three distinct surface tiers — sidebar (chrome), app (canvas), panel (overlay)
-   · Text hierarchy: primary 16:1, secondary 7:1, muted 4.5:1 — all pass WCAG AA
-   · Borders are always perceptible — not just rgba haze
-   · Accent (blue) used sparingly: active states, CTAs, focus rings only
-   · Dark mode uses the same 3-tier logic inverted — sidebar recedes darker
+   Color philosophy: Apple Human Interface Guidelines
+   · Surfaces: Apple's system background tiers (secondary for chrome, primary for canvas)
+   · Text: Apple's label hierarchy — label / secondaryLabel / tertiaryLabel / placeholderText
+   · Semantic: Apple's system colors — Blue, Green, Orange, Red
+   · Font: -apple-system resolves to SF Pro on Mac, best system font everywhere else
 */
 :root {
-  /* ── Surfaces (warm-neutral, clearly distinct) */
-  --bg-app:              #FFFFFF;      /* main canvas — pure white */
-  --bg-sidebar:          #F0EFEC;      /* chrome — warm gray, clearly set back */
-  --bg-panel:            #F7F6F3;      /* right panel — between sidebar and canvas */
+  /* ── Surfaces — Apple system background (light) */
+  --bg-app:              #FFFFFF;      /* systemBackground */
+  --bg-sidebar:          #F2F2F7;      /* secondarySystemBackground */
+  --bg-panel:            #F2F2F7;      /* secondarySystemBackground */
 
   /* Node states */
-  --bg-node-hover:       #ECEAE6;
-  --bg-node-selected:    #E3E1DC;
+  --bg-node-hover:       rgba(0, 0, 0, 0.04);
+  --bg-node-selected:    rgba(0, 0, 0, 0.09);
 
-  /* ── Text (warm-tinted neutrals, all pass AA) */
-  --text-primary:        #111111;      /* 18:1 on white */
-  --text-secondary:      #4A4A52;      /* 7.2:1 on white */
-  --text-muted:          #717179;      /* 4.6:1 on white — passes AA */
-  --text-placeholder:    #AAAAB2;
-  --text-completed:      #B4B4BC;
+  /* ── Text — Apple label colors (light) */
+  --text-primary:        #000000;      /* label */
+  --text-secondary:      #3C3C43;      /* secondaryLabel base (without alpha) */
+  --text-muted:          #8E8E93;      /* tertiaryLabel / systemGray */
+  --text-placeholder:    #C7C7CC;      /* placeholderText / systemGray3 */
+  --text-completed:      #AEAEB2;      /* systemGray2 */
 
-  /* ── Borders (always visible) */
-  --border:              #D8D7D4;      /* clear separator — 1.6:1 surface contrast */
-  --border-subtle:       #E5E4E1;      /* internal divisions */
-  --border-focus:        rgba(91, 140, 245, 0.6);
+  /* ── Borders — Apple separator */
+  --border:              #C6C6C8;      /* separator */
+  --border-subtle:       #E5E5EA;      /* systemGray5 */
+  --border-focus:        rgba(0, 122, 255, 0.4);
 
-  /* ── Accent */
-  --accent:              #4F7EF0;      /* slightly richer blue — 3.2:1 on white (use large/bold only) */
-  --accent-hover:        #3D6EE0;
-  --accent-subtle:       rgba(79, 126, 240, 0.1);
+  /* ── Accent — Apple Blue */
+  --accent:              #007AFF;
+  --accent-hover:        #0071E3;
+  --accent-subtle:       rgba(0, 122, 255, 0.10);
 
-  /* ── Semantic */
-  --success:             #16A34A;      /* green-700 — 4.6:1 on white */
-  --success-subtle:      rgba(22, 163, 74, 0.1);
-  --warning:             #D97706;      /* amber-600 — 4.5:1 on white */
-  --warning-subtle:      rgba(217, 119, 6, 0.1);
-  --warning-subtle-2:    rgba(217, 119, 6, 0.18);
-  --danger:              #DC2626;      /* red-600 — 5.9:1 on white */
-  --danger-subtle:       rgba(220, 38, 38, 0.07);
-  --danger-subtle-2:     rgba(220, 38, 38, 0.1);
-  --danger-subtle-3:     rgba(220, 38, 38, 0.14);
-  --danger-subtle-4:     rgba(220, 38, 38, 0.2);
+  /* ── Semantic — Apple system colors (light) */
+  --success:             #34C759;      /* systemGreen */
+  --success-subtle:      rgba(52, 199, 89, 0.12);
+  --warning:             #FF9500;      /* systemOrange */
+  --warning-subtle:      rgba(255, 149, 0, 0.10);
+  --warning-subtle-2:    rgba(255, 149, 0, 0.18);
+  --danger:              #FF3B30;      /* systemRed */
+  --danger-subtle:       rgba(255, 59, 48, 0.08);
+  --danger-subtle-2:     rgba(255, 59, 48, 0.10);
+  --danger-subtle-3:     rgba(255, 59, 48, 0.14);
+  --danger-subtle-4:     rgba(255, 59, 48, 0.20);
 
-  /* ── Radius */
+  /* ── Radius — Apple rounded corners */
   --radius-sm:           6px;
   --radius:              10px;
   --radius-lg:           14px;
@@ -56,8 +55,8 @@
   /* ── Shadows */
   --shadow-sm:           0 1px 3px rgba(0, 0, 0, 0.06);
   --shadow:              0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.05);
-  --shadow-lg:           0 8px 24px rgba(0, 0, 0, 0.10), 0 0 0 1px rgba(0, 0, 0, 0.05);
-  --shadow-overlay:      0 16px 48px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.07);
+  --shadow-lg:           0 8px 24px rgba(0, 0, 0, 0.10), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --shadow-overlay:      0 16px 48px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.08);
 
   /* Layout */
   --sidebar-width:       210px;
@@ -65,54 +64,54 @@
 }
 
 [data-theme="dark"] {
-  /* ── Surfaces (sidebar darkest — recedes as chrome) */
-  --bg-app:              #1C1C1F;      /* main canvas */
-  --bg-sidebar:          #141416;      /* chrome — darker, clearly different */
-  --bg-panel:            #222226;      /* right panel — lighter than canvas */
+  /* ── Surfaces — Apple dark (sidebar recedes, panel floats) */
+  --bg-app:              #1C1C1E;      /* secondarySystemBackground dark */
+  --bg-sidebar:          #000000;      /* systemBackground dark — recedes to black */
+  --bg-panel:            #2C2C2E;      /* tertiarySystemBackground dark */
 
   /* Node states */
   --bg-node-hover:       rgba(255, 255, 255, 0.06);
-  --bg-node-selected:    rgba(255, 255, 255, 0.10);
+  --bg-node-selected:    rgba(255, 255, 255, 0.12);
 
-  /* ── Text (all pass AA on dark surfaces) */
-  --text-primary:        #EAEAEE;      /* ~15:1 on #1C1C1F */
-  --text-secondary:      #A8A8B0;      /* ~6.5:1 */
-  --text-muted:          #78787F;      /* ~4.5:1 — passes AA */
-  --text-placeholder:    #4C4C55;
-  --text-completed:      #4E4E58;
+  /* ── Text — Apple label colors (dark) */
+  --text-primary:        #FFFFFF;      /* label dark */
+  --text-secondary:      #98989D;      /* secondaryLabel dark (EBEBF5 @ 60%) */
+  --text-muted:          #636366;      /* tertiaryLabel dark / systemGray dark */
+  --text-placeholder:    #3A3A3C;      /* systemGray6 dark */
+  --text-completed:      #48484A;      /* systemGray5 dark */
 
-  /* ── Borders (must be visible in dark — rgba too subtle) */
-  --border:              #35353C;      /* solid, clearly perceptible */
-  --border-subtle:       #28282E;
-  --border-focus:        rgba(99, 146, 255, 0.5);
+  /* ── Borders — Apple separator (dark) */
+  --border:              #38383A;      /* separator dark */
+  --border-subtle:       #2C2C2E;      /* systemGray6 dark */
+  --border-focus:        rgba(10, 132, 255, 0.5);
 
-  /* ── Accent (slightly lighter for dark bg) */
-  --accent:              #6392FF;
-  --accent-hover:        #7AA3FF;
-  --accent-subtle:       rgba(99, 146, 255, 0.12);
+  /* ── Accent — Apple Blue (dark) */
+  --accent:              #0A84FF;
+  --accent-hover:        #409CFF;
+  --accent-subtle:       rgba(10, 132, 255, 0.15);
 
-  /* ── Semantic (adjusted for dark) */
-  --success:             #22C55E;
-  --success-subtle:      rgba(34, 197, 94, 0.12);
-  --warning:             #F59E0B;
-  --warning-subtle:      rgba(245, 158, 11, 0.12);
-  --warning-subtle-2:    rgba(245, 158, 11, 0.20);
-  --danger:              #F87171;      /* lighter red for dark bg readability */
-  --danger-subtle:       rgba(248, 113, 113, 0.10);
-  --danger-subtle-2:     rgba(248, 113, 113, 0.13);
-  --danger-subtle-3:     rgba(248, 113, 113, 0.18);
-  --danger-subtle-4:     rgba(248, 113, 113, 0.24);
+  /* ── Semantic — Apple system colors (dark) */
+  --success:             #30D158;      /* systemGreen dark */
+  --success-subtle:      rgba(48, 209, 88, 0.14);
+  --warning:             #FF9F0A;      /* systemOrange dark */
+  --warning-subtle:      rgba(255, 159, 10, 0.12);
+  --warning-subtle-2:    rgba(255, 159, 10, 0.20);
+  --danger:              #FF453A;      /* systemRed dark */
+  --danger-subtle:       rgba(255, 69, 58, 0.10);
+  --danger-subtle-2:     rgba(255, 69, 58, 0.13);
+  --danger-subtle-3:     rgba(255, 69, 58, 0.18);
+  --danger-subtle-4:     rgba(255, 69, 58, 0.24);
 
   /* ── Shadows */
-  --shadow-sm:           0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow:              0 2px 8px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  --shadow-lg:           0 8px 24px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
-  --shadow-overlay:      0 16px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.07);
+  --shadow-sm:           0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow:              0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-lg:           0 8px 24px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.07);
+  --shadow-overlay:      0 16px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 /* ─── Tailwind theme mapping ─────────────────────────────────── */
 @theme inline {
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
 }
 
 /* ─── Base ───────────────────────────────────────────────────── */
@@ -128,11 +127,12 @@ html, body {
 body {
   background: var(--bg-app);
   color: var(--text-primary);
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 15px;
   line-height: 1.5;
+  letter-spacing: -0.01em;
 }
 
 /* ─── Scrollbar ──────────────────────────────────────────────── */
