@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Plus } from "lucide-react";
 import { useStore } from "@/store";
@@ -11,19 +11,24 @@ import { TreeNode } from "./TreeNode";
 export function LifeTree() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { visibleNodes, focusedId, addNode, setFocused, setEditing } =
+  // Select raw data with shallow equality — no derived arrays in the selector
+  const { nodes, rootIds, collapsedIds, view, focusedId, addNode, setFocused, setEditing } =
     useStore(useShallow((s) => ({
-      visibleNodes: selectVisibleNodes(
-        s.nodes,
-        s.rootIds,
-        s.collapsedIds,
-        s.view
-      ),
+      nodes: s.nodes,
+      rootIds: s.rootIds,
+      collapsedIds: s.collapsedIds,
+      view: s.view,
       focusedId: s.focusedId,
       addNode: s.addNode,
       setFocused: s.setFocused,
       setEditing: s.setEditing,
     })));
+
+  // Compute derived array outside the selector so it can be memoized
+  const visibleNodes = useMemo(
+    () => selectVisibleNodes(nodes, rootIds, collapsedIds, view),
+    [nodes, rootIds, collapsedIds, view]
+  );
 
   const rowVirtualizer = useVirtualizer({
     count: visibleNodes.length,

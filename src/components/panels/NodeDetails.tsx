@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { format } from "date-fns";
 import { Sun, Calendar, X } from "lucide-react";
 import { useStore } from "@/store";
@@ -19,16 +20,18 @@ const REMINDER_OPTIONS: { value: ReminderOption; label: string }[] = [
 ];
 
 export function NodeDetails({ id }: Props) {
-  const { node, breadcrumb, todayIds, updateNode, addToToday, removeFromToday, setSelected } =
+  const { node, nodes, todayIds, updateNode, addToToday, removeFromToday, setSelected } =
     useStore(useShallow((s) => ({
       node: s.nodes[id],
-      breadcrumb: selectBreadcrumb(s.nodes, id),
+      nodes: s.nodes,
       todayIds: s.todayIds,
       updateNode: s.updateNode,
       addToToday: s.addToToday,
       removeFromToday: s.removeFromToday,
       setSelected: s.setSelected,
     })));
+
+  const breadcrumb = useMemo(() => selectBreadcrumb(nodes, id), [nodes, id]);
 
   if (!node) return null;
 
