@@ -50,21 +50,31 @@ export function selectUpcomingNodes(
 ): { node: LifeNode; daysUntil: number }[] {
   const now = startOfDay(new Date());
   const cutoff = addDays(now, 7);
-  return Object.values(nodes)
-    .filter((n) => {
-      if (n.archived || n.completed) return false;
-      if (!n.dueDate) return false;
+  const results: { node: LifeNode; daysUntil: number }[] = [];
+
+  for (const n of Object.values(nodes)) {
+    if (n.archived || n.completed) continue;
+
+    let daysUntil: number | null = null;
+
+    if (n.reminder === "today") {
+      daysUntil = 0;
+    } else if (n.reminder === "tomorrow") {
+      daysUntil = 1;
+    } else if (n.dueDate) {
       const due = startOfDay(new Date(n.dueDate));
-      return !isAfter(due, cutoff);
-    })
-    .map((n) => {
-      const due = startOfDay(new Date(n.dueDate!));
-      const diff = Math.round(
+      if (isAfter(due, cutoff)) continue;
+      daysUntil = Math.round(
         (due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
       );
-      return { node: n, daysUntil: diff };
-    })
-    .sort((a, b) => a.daysUntil - b.daysUntil);
+    }
+
+    if (daysUntil !== null) {
+      results.push({ node: n, daysUntil });
+    }
+  }
+
+  return results.sort((a, b) => a.daysUntil - b.daysUntil);
 }
 
 export function selectSearchIndex(
