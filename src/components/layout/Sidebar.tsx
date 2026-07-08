@@ -103,9 +103,9 @@ export function Sidebar() {
           </div>
           <div>
             <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
-              My Life
+              idolist
             </div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Personal OS</div>
+            <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Your life, organized</div>
           </div>
         </div>
       </div>

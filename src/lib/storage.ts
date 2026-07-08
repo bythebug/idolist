@@ -59,7 +59,7 @@ export function exportData(state: PersistedState): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `lifeos-backup-${todayStr()}.json`;
+  a.download = `idolist-backup-${todayStr()}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }

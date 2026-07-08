@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "LifeOS",
-  description: "Your personal operating system",
+  title: "idolist",
+  description: "Your life, organized",
 };
 
 export default function RootLayout({

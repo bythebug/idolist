@@ -245,7 +245,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
             textAlign: "center",
           }}
         >
-          LifeOS v{VERSION}
+          idolist v{VERSION}
         </div>
       </motion.div>
     </>

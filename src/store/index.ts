@@ -97,7 +97,7 @@ interface StoreActions {
   persist: () => void;
 }
 
-export type LifeOSStore = StoreState & StoreActions;
+export type IdolistStore = StoreState & StoreActions;
 
 // ---------------------------------------------------------------------------
 // Persistence helpers
@@ -105,7 +105,7 @@ export type LifeOSStore = StoreState & StoreActions;
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
-function debouncedSave(get: () => LifeOSStore) {
+function debouncedSave(get: () => IdolistStore) {
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     const s = get();
@@ -186,7 +186,7 @@ function emptyState(): StoreState {
 // Store
 // ---------------------------------------------------------------------------
 
-export const useStore = create<LifeOSStore>()(
+export const useStore = create<IdolistStore>()(
   immer((set, get) => {
     // Records a history entry AFTER a mutation has been applied.
     // Call with the captured before-snapshot; reads after-snapshot from get().

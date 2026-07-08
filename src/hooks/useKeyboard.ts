@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useStore, type LifeOSStore } from "@/store";
+import { useStore, type IdolistStore } from "@/store";
 import { selectVisibleNodes } from "@/store/selectors";
 import { getNextVisibleId, getPreviousVisibleId } from "@/lib/tree";
 
 export function useKeyboard() {
   // Ref always holds the latest store snapshot — avoids stale closure and
   // prevents the effect from re-registering the listener on every render.
-  const storeRef = useRef<LifeOSStore | null>(null);
+  const storeRef = useRef<IdolistStore | null>(null);
   const store = useStore();
   storeRef.current = store;
 

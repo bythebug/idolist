@@ -1,10 +1,10 @@
-# LifeOS
+# idolist
 
 A personal operating system built around a hierarchical life tree. Keyboard-first, premium feel, zero cloud dependency.
 
 ## What it is
 
-LifeOS is not a todo app. It's a tree-structured map of everything that matters — areas of your life (Career, Health, Finance, Learning…) broken down into projects and tasks, all in one view. Think Notion's structure with Linear's keyboard speed.
+idolist is not a todo app. It's a tree-structured map of everything that matters — areas of your life (Career, Health, Finance, Learning…) broken down into projects and tasks, all in one view. Think Notion's structure with Linear's keyboard speed.
 
 ## Features
 
@@ -103,4 +103,4 @@ npm test
 
 ## Data
 
-All data lives in `localStorage` under the key `lifeos-state`. Use **Settings → Export** to download a JSON backup. Import and Clear are also available there.
+All data lives in `localStorage` under the key `idolist`. Use **Settings → Export** to download a JSON backup. Import and Clear are also available there.

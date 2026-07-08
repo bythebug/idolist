@@ -260,7 +260,7 @@ export function LifeTree() {
                   lineHeight: 1.2,
                 }}
               >
-                My Life
+                idolist
               </h1>
               <p
                 style={{
@@ -269,7 +269,7 @@ export function LifeTree() {
                   margin: "3px 0 0",
                 }}
               >
-                A map of everything that matters.
+                Your life, organized.
               </p>
             </div>
             <button

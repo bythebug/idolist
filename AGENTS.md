@@ -1,4 +1,4 @@
-# Agent Instructions — LifeOS
+# Agent Instructions — idolist
 
 ## Framework version
 
@@ -46,7 +46,7 @@ recordHistory("description", beforeNodes, beforeRootIds);
 
 ```typescript
 // storeRef pattern — prevents re-registering listener on every render
-const storeRef = useRef<LifeOSStore | null>(null);
+const storeRef = useRef<IdolistStore | null>(null);
 const store = useStore();
 storeRef.current = store;
 useEffect(() => {
