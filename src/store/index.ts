@@ -510,6 +510,7 @@ export const useStore = create<IdolistStore>()(
           const subtree = getSubtree(state.nodes as Record<string, LifeNode>, id);
           for (const sid of subtree) {
             if (state.nodes[sid]) state.nodes[sid].archived = true;
+            state.todayIds.delete(sid);
           }
           if (state.selectedId && subtree.includes(state.selectedId)) state.selectedId = null;
           if (state.focusedId && subtree.includes(state.focusedId)) state.focusedId = null;

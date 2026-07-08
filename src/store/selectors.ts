@@ -92,8 +92,13 @@ export function selectSearchIndex(
     });
 }
 
-export function selectTodayCount(todayIds: Set<string>): number {
-  return todayIds.size;
+export function selectTodayCount(
+  nodes: Record<string, LifeNode>,
+  todayIds: Set<string>
+): number {
+  return Array.from(todayIds).filter(
+    (id) => nodes[id] && !nodes[id].archived
+  ).length;
 }
 
 export function selectUpcomingCount(

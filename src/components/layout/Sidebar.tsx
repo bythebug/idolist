@@ -46,7 +46,7 @@ export function Sidebar() {
     }))
   );
 
-  const todayCount = selectTodayCount(todayIds);
+  const todayCount = selectTodayCount(nodes, todayIds);
 
   const areas = useMemo(
     () =>

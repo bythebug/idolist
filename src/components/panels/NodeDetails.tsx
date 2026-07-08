@@ -106,7 +106,10 @@ export function NodeDetails({ id }: Props) {
           <input
             key={id}
             defaultValue={node.title}
-            onBlur={(e) => updateNode(id, { title: e.target.value.trim() })}
+            onBlur={(e) => {
+              const next = e.target.value.trim();
+              if (next !== node.title) updateNode(id, { title: next });
+            }}
             placeholder="Untitled"
             style={{
               flex: 1,
