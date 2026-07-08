@@ -44,7 +44,7 @@ export function InboxView() {
   function submit() {
     if (!draft.trim()) return;
     const id = addToInbox(parsed.title);
-    if (parsed.dueDate) updateNode(id, { dueDate: parsed.dueDate });
+    if (parsed.dueDate) updateNode(id, { dueDate: parsed.dueDate, dueTime: parsed.dueTime ?? null });
     if (parsed.reminder !== "none") updateNode(id, { reminder: parsed.reminder });
     if (parsed.isToday) addToToday(id);
     setDraft("");

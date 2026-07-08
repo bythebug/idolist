@@ -167,24 +167,24 @@ export function NodeDetails({ id }: Props) {
               marginBottom: 6,
             }}
           >
-            Due Date
+            Due Date &amp; Time
           </label>
-          <input
-            type="date"
-            defaultValue={node.dueDate ?? ""}
-            onChange={(e) => updateNode(id, { dueDate: e.target.value || null })}
-            style={{
-              fontFamily: "inherit",
-              fontSize: 13,
-              background: "var(--bg-sidebar)",
-              border: "1px solid var(--border)",
-              borderRadius: 7,
-              padding: "6px 10px",
-              color: "var(--text-primary)",
-              outline: "none",
-              width: "100%",
-            }}
-          />
+          <div style={{ display: "flex", gap: 6 }}>
+            <input
+              type="date"
+              defaultValue={node.dueDate ?? ""}
+              onChange={(e) => updateNode(id, { dueDate: e.target.value || null, dueTime: e.target.value ? node.dueTime : null })}
+              style={{ ...inputStyle, flex: 1 }}
+            />
+            <input
+              type="time"
+              defaultValue={node.dueTime ?? ""}
+              disabled={!node.dueDate}
+              onChange={(e) => updateNode(id, { dueTime: e.target.value || null })}
+              title={!node.dueDate ? "Set a due date first" : ""}
+              style={{ ...inputStyle, width: 100, opacity: node.dueDate ? 1 : 0.4, cursor: node.dueDate ? "auto" : "not-allowed" }}
+            />
+          </div>
         </div>
 
         {/* Reminder */}
@@ -341,3 +341,14 @@ export function NodeDetails({ id }: Props) {
     </div>
   );
 }
+
+const inputStyle: React.CSSProperties = {
+  fontFamily: "inherit",
+  fontSize: 13,
+  background: "var(--bg-sidebar)",
+  border: "1px solid var(--border)",
+  borderRadius: 7,
+  padding: "6px 10px",
+  color: "var(--text-primary)",
+  outline: "none",
+};

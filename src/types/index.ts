@@ -21,6 +21,7 @@ export interface LifeNode {
   repeat: RepeatOption;
   lastCompletedAt: number | null;
   dueDate: string | null;
+  dueTime: string | null;        // "HH:mm" 24-hour, null if not set
   notes: string;
   icon: string | null;
   createdAt: number;

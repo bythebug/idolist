@@ -27,6 +27,7 @@ function makeNode(
     repeat: "none",
     lastCompletedAt: null,
     dueDate: null,
+    dueTime: null,
     notes: "",
     icon,
     createdAt: now,

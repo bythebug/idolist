@@ -350,6 +350,11 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
         {node.dueDate ? (
           <span style={{ fontSize: 11, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
             {format(new Date(node.dueDate), "MMM d")}
+            {node.dueTime && (
+              <span style={{ marginLeft: 3, opacity: 0.7 }}>
+                {format(new Date(`${node.dueDate}T${node.dueTime}`), "h:mma")}
+              </span>
+            )}
           </span>
         ) : node.repeat && node.repeat !== "none" ? (
           <span
