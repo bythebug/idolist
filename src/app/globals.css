@@ -30,17 +30,17 @@
   /* ── Borders — gossamer, barely-there */
   --border:              rgba(55, 53, 47, 0.09);
   --border-subtle:       rgba(55, 53, 47, 0.05);
-  --border-focus:        rgba(35, 131, 226, 0.45);
+  --border-focus:        rgba(232, 113, 26, 0.45);
 
-  /* ── Accent — Notion blue (calm, not neon) */
-  --accent:              #2383E2;
-  --accent-hover:        #0F73D9;
-  --accent-subtle:       rgba(35, 131, 226, 0.10);
+  /* ── Accent — warm orange */
+  --accent:              #E8711A;
+  --accent-hover:        #D06010;
+  --accent-subtle:       rgba(232, 113, 26, 0.10);
 
   /* ── Semantic — earthy/muted Notion palette */
   --success:             #0F7B6C;
   --success-subtle:      rgba(15, 123, 108, 0.10);
-  --warning:             #D9730D;
+  --warning:             #CA8A04;
   --warning-subtle:      rgba(217, 115, 13, 0.10);
   --warning-subtle-2:    rgba(217, 115, 13, 0.18);
   --danger:              #E03E3E;
@@ -86,12 +86,12 @@
   /* ── Borders — nearly invisible in dark */
   --border:              rgba(255, 255, 255, 0.09);
   --border-subtle:       rgba(255, 255, 255, 0.055);
-  --border-focus:        rgba(82, 156, 202, 0.50);
+  --border-focus:        rgba(245, 146, 58, 0.50);
 
-  /* ── Accent — softer blue for dark bg */
-  --accent:              #529CCA;
-  --accent-hover:        #6DB3DF;
-  --accent-subtle:       rgba(82, 156, 202, 0.15);
+  /* ── Accent — warm orange for dark bg */
+  --accent:              #F5923A;
+  --accent-hover:        #FFA54E;
+  --accent-subtle:       rgba(245, 146, 58, 0.15);
 
   /* ── Semantic — lightened for dark bg */
   --success:             #4DAB9A;
@@ -168,9 +168,9 @@ body {
 }
 
 ::selection {
-  background: rgba(35, 131, 226, 0.15);
+  background: rgba(232, 113, 26, 0.15);
   color: var(--text-primary);
 }
 [data-theme="dark"] ::selection {
-  background: rgba(82, 156, 202, 0.20);
+  background: rgba(245, 146, 58, 0.20);
 }
