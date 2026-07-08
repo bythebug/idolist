@@ -372,6 +372,9 @@ export function LifeTree() {
             }}
           >
             <GripVertical size={11} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+            {draggingNode.icon && (
+              <span style={{ fontSize: 13, flexShrink: 0 }}>{draggingNode.icon}</span>
+            )}
             <span
               style={{
                 overflow: "hidden",

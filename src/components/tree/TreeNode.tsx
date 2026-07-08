@@ -7,6 +7,7 @@ import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
 import { TreeNodeCheckbox } from "./TreeNodeCheckbox";
 import { TreeNodeTitle } from "./TreeNodeTitle";
+import { TreeNodeIcon } from "./TreeNodeIcon";
 
 interface Props {
   id: string;
@@ -175,6 +176,14 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
           }}
         />
       </button>
+
+      {/* Icon */}
+      <TreeNodeIcon
+        id={id}
+        icon={node.icon}
+        depth={depth}
+        type={node.type}
+      />
 
       {/* Checkbox */}
       <TreeNodeCheckbox

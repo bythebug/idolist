@@ -6,6 +6,7 @@ import { Sun, Calendar, X } from "lucide-react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
 import { selectBreadcrumb } from "@/store/selectors";
+import { TreeNodeIcon } from "@/components/tree/TreeNodeIcon";
 import type { ReminderOption } from "@/types";
 
 interface Props {
@@ -99,25 +100,27 @@ export function NodeDetails({ id }: Props) {
 
       {/* Scrollable content */}
       <div style={{ flex: 1, overflow: "auto", padding: "16px" }}>
-        {/* Title */}
-        <input
-          key={id}
-          defaultValue={node.title}
-          onBlur={(e) => updateNode(id, { title: e.target.value.trim() })}
-          placeholder="Untitled"
-          style={{
-            width: "100%",
-            fontSize: 18,
-            fontWeight: 600,
-            fontFamily: "inherit",
-            background: "transparent",
-            border: "none",
-            outline: "none",
-            color: "var(--text-primary)",
-            marginBottom: 16,
-            padding: 0,
-          }}
-        />
+        {/* Icon + Title row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+          <TreeNodeIcon id={id} icon={node.icon} depth={node.parentId ? 1 : 0} type={node.type} />
+          <input
+            key={id}
+            defaultValue={node.title}
+            onBlur={(e) => updateNode(id, { title: e.target.value.trim() })}
+            placeholder="Untitled"
+            style={{
+              flex: 1,
+              fontSize: 18,
+              fontWeight: 600,
+              fontFamily: "inherit",
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              color: "var(--text-primary)",
+              padding: 0,
+            }}
+          />
+        </div>
 
         {/* Today toggle */}
         <button
