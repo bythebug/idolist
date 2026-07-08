@@ -1,6 +1,10 @@
+import { enableMapSet } from "immer";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { nanoid } from "nanoid";
+
+// Immer requires this to support Set and Map mutations in producers
+enableMapSet();
 import type { LifeNode, View, DragState } from "@/types";
 import { getSubtree } from "@/lib/tree";
 import {

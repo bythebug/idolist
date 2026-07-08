@@ -4,7 +4,6 @@ import { format } from "date-fns";
 import { useStore } from "@/store";
 import { selectTodayNodes } from "@/store/selectors";
 import { TreeNode } from "@/components/tree/TreeNode";
-import { getVisibleNodes } from "@/lib/tree";
 
 export function TodayView() {
   const { nodes, todayIds } = useStore((s) => ({

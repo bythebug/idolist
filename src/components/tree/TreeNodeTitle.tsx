@@ -12,7 +12,11 @@ interface Props {
 
 export function TreeNodeTitle({ id, title, completed, isEditing }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { updateNode, deleteNode, addNode, indentNode, outdentNode, setEditing, setFocused, nodes } =
+  // Suppresses blur handler when Enter/Tab already handled the action
+  const suppressBlurRef = useRef(false);
+
+  // Only subscribe to actions (stable references), not node data
+  const { updateNode, deleteNode, addNode, indentNode, outdentNode, setEditing, setFocused } =
     useStore((s) => ({
       updateNode: s.updateNode,
       deleteNode: s.deleteNode,
@@ -21,28 +25,29 @@ export function TreeNodeTitle({ id, title, completed, isEditing }: Props) {
       outdentNode: s.outdentNode,
       setEditing: s.setEditing,
       setFocused: s.setFocused,
-      nodes: s.nodes,
     }));
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
-      inputRef.current.select();
+      // Place cursor at end (not select-all) so user can continue typing
+      const len = inputRef.current.value.length;
+      inputRef.current.setSelectionRange(len, len);
     }
   }, [isEditing]);
 
   function save(value: string) {
-    const trimmed = value.trim();
-    updateNode(id, { title: trimmed });
+    updateNode(id, { title: value.trim() });
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       e.preventDefault();
-      const value = inputRef.current?.value ?? "";
-      save(value);
+      suppressBlurRef.current = true;
+      save(inputRef.current?.value ?? "");
 
-      const node = nodes[id];
+      // Create sibling below and start editing it
+      const node = useStore.getState().nodes[id];
       const newId = addNode(node?.parentId ?? null, id);
       setEditing(newId);
       setFocused(newId);
@@ -51,25 +56,31 @@ export function TreeNodeTitle({ id, title, completed, isEditing }: Props) {
 
     if (e.key === "Tab") {
       e.preventDefault();
-      const value = inputRef.current?.value ?? "";
-      save(value);
+      suppressBlurRef.current = true;
+      save(inputRef.current?.value ?? "");
 
       if (e.shiftKey) {
         outdentNode(id);
       } else {
         indentNode(id);
       }
-      // Keep editing
-      setTimeout(() => setEditing(id), 0);
+      // Keep editing this node after indent/outdent
+      setTimeout(() => {
+        suppressBlurRef.current = false;
+        setEditing(id);
+      }, 0);
       return;
     }
 
     if (e.key === "Backspace" && inputRef.current?.value === "") {
       e.preventDefault();
-      const node = nodes[id];
-      // Move focus to sibling above or parent
-      const parent = node?.parentId ? nodes[node.parentId] : null;
-      const siblings = parent ? parent.childIds : useStore.getState().rootIds;
+      suppressBlurRef.current = true;
+
+      // Focus sibling above or parent before deleting
+      const state = useStore.getState();
+      const node = state.nodes[id];
+      const parent = node?.parentId ? state.nodes[node.parentId] : null;
+      const siblings = parent ? parent.childIds : state.rootIds;
       const idx = siblings.indexOf(id);
       const prevId = idx > 0 ? siblings[idx - 1] : node?.parentId ?? null;
 
@@ -85,14 +96,20 @@ export function TreeNodeTitle({ id, title, completed, isEditing }: Props) {
     }
 
     if (e.key === "Escape") {
+      suppressBlurRef.current = true;
       setEditing(null);
       return;
     }
   }
 
   function handleBlur() {
+    if (suppressBlurRef.current) {
+      suppressBlurRef.current = false;
+      return;
+    }
     const value = inputRef.current?.value ?? "";
     if (value.trim() === "" && title === "") {
+      // New node with no content — clean it up
       deleteNode(id);
     } else {
       save(value);

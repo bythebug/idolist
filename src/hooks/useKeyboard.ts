@@ -1,59 +1,57 @@
 "use client";
 
-import { useEffect } from "react";
-import { useStore } from "@/store";
+import { useEffect, useRef } from "react";
+import { useStore, type LifeOSStore } from "@/store";
 import { selectVisibleNodes } from "@/store/selectors";
 import { getNextVisibleId, getPreviousVisibleId } from "@/lib/tree";
 
 export function useKeyboard() {
+  // Ref always holds the latest store snapshot — avoids stale closure and
+  // prevents the effect from re-registering the listener on every render.
+  const storeRef = useRef<LifeOSStore | null>(null);
   const store = useStore();
+  storeRef.current = store;
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      const meta = e.metaKey || e.ctrlKey;
-      const { editingId, focusedId, view } = store;
+      const s = storeRef.current;
+      if (!s) return;
 
-      // Global shortcuts — always active
+      const meta = e.metaKey || e.ctrlKey;
+      const { editingId, focusedId, view } = s;
+
+      // Global shortcuts
       if (meta && e.key === "k") {
         e.preventDefault();
-        store.openCommandPalette();
+        s.openCommandPalette();
         return;
       }
       if (meta && e.key === "/") {
         e.preventDefault();
-        if (store.shortcutsOpen) {
-          store.closeShortcuts();
-        } else {
-          store.openShortcuts();
-        }
+        s.shortcutsOpen ? s.closeShortcuts() : s.openShortcuts();
         return;
       }
       if (meta && e.key === "z" && !e.shiftKey) {
         e.preventDefault();
-        // undo — placeholder for Phase 15
-        return;
+        return; // Phase 15: undo
       }
       if (meta && e.key === "z" && e.shiftKey) {
         e.preventDefault();
-        // redo — placeholder for Phase 15
-        return;
+        return; // Phase 15: redo
       }
 
-      // Skip tree navigation while editing
+      // Skip tree navigation while a title input is focused
       if (editingId) return;
 
-      // Tree navigation
       if (view !== "life" && view !== "today") return;
 
-      const { nodes, rootIds, collapsedIds } = store;
-      const visible = selectVisibleNodes(nodes, rootIds, collapsedIds, "life");
+      const visible = selectVisibleNodes(s.nodes, s.rootIds, s.collapsedIds, "life");
 
-      if (!focusedId && visible.length > 0) {
-        if (e.key === "ArrowDown") {
-          e.preventDefault();
-          store.setFocused(visible[0].id);
-          return;
-        }
+      // Focus first node if nothing focused
+      if (!focusedId && visible.length > 0 && e.key === "ArrowDown") {
+        e.preventDefault();
+        s.setFocused(visible[0].id);
+        return;
       }
 
       if (!focusedId) return;
@@ -62,80 +60,79 @@ export function useKeyboard() {
         case "ArrowDown": {
           e.preventDefault();
           const next = getNextVisibleId(visible, focusedId);
-          if (next) store.setFocused(next);
+          if (next) s.setFocused(next);
           break;
         }
         case "ArrowUp": {
           e.preventDefault();
           const prev = getPreviousVisibleId(visible, focusedId);
-          if (prev) store.setFocused(prev);
+          if (prev) s.setFocused(prev);
           break;
         }
         case "ArrowRight": {
           e.preventDefault();
-          const node = nodes[focusedId];
+          const node = s.nodes[focusedId];
           if (!node) break;
-          if (node.childIds.length > 0 && collapsedIds.has(focusedId)) {
-            store.toggleCollapsed(focusedId);
+          if (node.childIds.length > 0 && s.collapsedIds.has(focusedId)) {
+            s.toggleCollapsed(focusedId);
           } else if (node.childIds.length > 0) {
-            store.setFocused(node.childIds[0]);
+            s.setFocused(node.childIds[0]);
           }
           break;
         }
         case "ArrowLeft": {
           e.preventDefault();
-          const node = nodes[focusedId];
+          const node = s.nodes[focusedId];
           if (!node) break;
-          if (node.childIds.length > 0 && !collapsedIds.has(focusedId)) {
-            store.toggleCollapsed(focusedId);
+          if (node.childIds.length > 0 && !s.collapsedIds.has(focusedId)) {
+            s.toggleCollapsed(focusedId);
           } else if (node.parentId) {
-            store.setFocused(node.parentId);
+            s.setFocused(node.parentId);
           }
           break;
         }
         case "Enter": {
           e.preventDefault();
-          store.setEditing(focusedId);
+          s.setEditing(focusedId);
           break;
         }
         case " ": {
+          // Only intercept Space when tree is focused, not inside inputs
+          const active = document.activeElement;
+          if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) break;
           e.preventDefault();
-          store.toggleComplete(focusedId);
+          s.toggleComplete(focusedId);
           break;
         }
         case "Backspace":
         case "Delete": {
           if (meta) {
             e.preventDefault();
-            const node = nodes[focusedId];
-            const prevId = getPreviousVisibleId(visible, focusedId);
-            store.deleteNode(focusedId);
-            if (prevId) store.setFocused(prevId);
-            else store.setFocused(null);
+            const prev = getPreviousVisibleId(visible, focusedId);
+            s.deleteNode(focusedId);
+            s.setFocused(prev ?? null);
           }
           break;
         }
         case "d": {
           if (meta) {
             e.preventDefault();
-            store.duplicateNode(focusedId);
+            s.duplicateNode(focusedId);
           }
           break;
         }
         case "t": {
           if (meta) {
             e.preventDefault();
-            if (store.todayIds.has(focusedId)) {
-              store.removeFromToday(focusedId);
-            } else {
-              store.addToToday(focusedId);
-            }
+            s.todayIds.has(focusedId)
+              ? s.removeFromToday(focusedId)
+              : s.addToToday(focusedId);
           }
           break;
         }
         case "Escape": {
-          store.setFocused(null);
-          store.setSelected(null);
+          s.setFocused(null);
+          s.setSelected(null);
           break;
         }
       }
@@ -143,5 +140,5 @@ export function useKeyboard() {
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [store]);
+  }, []); // Empty deps — storeRef.current is always current without re-registering
 }
