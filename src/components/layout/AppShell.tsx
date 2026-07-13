@@ -28,7 +28,7 @@ function ResizeHandle({ onDragStart }: { onDragStart: (e: React.MouseEvent) => v
   return (
     <div
       onMouseDown={onDragStart}
-      style={{ width: 6, flexShrink: 0, cursor: "col-resize", position: "relative", zIndex: 10 }}
+      style={{ width: 4, flexShrink: 0, cursor: "col-resize", position: "relative", zIndex: 10 }}
       onMouseEnter={(e) => {
         ((e.currentTarget as HTMLElement).firstChild as HTMLElement).style.opacity = "1";
       }}
@@ -45,8 +45,9 @@ function ResizeHandle({ onDragStart }: { onDragStart: (e: React.MouseEvent) => v
           width: 1,
           background: "var(--accent)",
           opacity: 0,
-          transition: "opacity 150ms",
+          transition: "opacity 200ms",
           pointerEvents: "none",
+          borderRadius: 99,
         }}
       />
     </div>
@@ -125,10 +126,23 @@ export function AppShell() {
         display: "flex",
         height: "100vh",
         overflow: "hidden",
-        background: "var(--bg-app)",
+        background: "transparent",
+        padding: "10px",
+        gap: 6,
       }}
     >
-      <div style={{ width: sidebarWidth, flexShrink: 0, overflow: "hidden" }}>
+      <div
+        style={{
+          width: sidebarWidth,
+          flexShrink: 0,
+          overflow: "hidden",
+          backdropFilter: "blur(48px) saturate(180%)",
+          WebkitBackdropFilter: "blur(48px) saturate(180%)",
+          border: "1px solid var(--glass-border)",
+          borderRadius: 22,
+          boxShadow: "var(--shadow-glass)",
+        }}
+      >
         <Sidebar />
       </div>
 
@@ -141,7 +155,12 @@ export function AppShell() {
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
-          background: "var(--bg-app)",
+          backdropFilter: "blur(48px) saturate(180%)",
+          WebkitBackdropFilter: "blur(48px) saturate(180%)",
+          border: "1px solid var(--glass-border)",
+          borderRadius: 22,
+          boxShadow: "var(--shadow-glass)",
+          background: "var(--bg-panel)",
         }}
       >
         {view === "life" && <LifeTree />}
@@ -154,7 +173,18 @@ export function AppShell() {
 
       <ResizeHandle onDragStart={(e) => startResize("right", e)} />
 
-      <div style={{ width: panelWidth, flexShrink: 0, overflow: "hidden" }}>
+      <div
+        style={{
+          width: panelWidth,
+          flexShrink: 0,
+          overflow: "hidden",
+          backdropFilter: "blur(48px) saturate(180%)",
+          WebkitBackdropFilter: "blur(48px) saturate(180%)",
+          border: "1px solid var(--glass-border)",
+          borderRadius: 22,
+          boxShadow: "var(--shadow-glass)",
+        }}
+      >
         <ContextPanel />
       </div>
 

@@ -121,21 +121,24 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
         height: 40,
         gap: 0,
         cursor: "default",
-        borderRadius: 8,
-        margin: "0 4px",
+        borderRadius: 14,
+        margin: "0 6px",
         background: isSelected
           ? "var(--bg-node-selected)"
           : isDropInside
           ? "var(--accent-subtle)"
           : "transparent",
+        boxShadow: isSelected
+          ? "inset 0 1px 0 rgba(255,255,255,0.70), 0 1px 3px rgba(217,119,6,0.12)"
+          : "none",
         outline: isDropInside
           ? "2px solid var(--accent)"
           : showFocusRing
           ? "2px solid var(--accent)"
           : "none",
         outlineOffset: -2,
-        transition: "background 100ms",
-        opacity: isDragging ? 0.3 : 1,
+        transition: "background 100ms, box-shadow 100ms",
+        opacity: isDragging ? 0.25 : 1,
         position: "relative",
       }}
       className="tree-node-row"
@@ -196,7 +199,7 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
             padding: 0,
             cursor: hasChildren ? "pointer" : "default",
             color: hasChildren ? "var(--text-muted)" : "transparent",
-            borderRadius: 4,
+            borderRadius: 6,
           }}
         >
           <ChevronRight
@@ -266,7 +269,7 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
               flex: 1,
               height: 4,
               background: "var(--border)",
-              borderRadius: 2,
+              borderRadius: 4,
               overflow: "hidden",
             }}
             title={`${Math.round(progress * 100)}% complete`}
@@ -276,7 +279,7 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
                 height: "100%",
                 width: `${progress * 100}%`,
                 background: progress === 1 ? "var(--success)" : "var(--accent)",
-                borderRadius: 2,
+                borderRadius: 4,
                 transition: "width 300ms ease",
               }}
             />
@@ -285,7 +288,7 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
         {progress !== null && (
           <span
             style={{
-              fontSize: 10,
+              fontSize: 11,
               color: "var(--text-muted)",
               marginLeft: 5,
               flexShrink: 0,
@@ -320,7 +323,7 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
             justifyContent: "center",
             background: "transparent",
             border: "none",
-            borderRadius: 5,
+            borderRadius: 8,
             cursor: "pointer",
             color: isToday ? "var(--warning)" : "var(--border)",
             padding: 0,
@@ -348,7 +351,7 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
         }}
       >
         {node.dueDate ? (
-          <span style={{ fontSize: 11, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+          <span style={{ fontSize: 12, color: "var(--text-muted)", whiteSpace: "nowrap" }}>
             {format(new Date(node.dueDate), "MMM d")}
             {node.dueTime && (
               <span style={{ marginLeft: 3, opacity: 0.7 }}>
@@ -365,6 +368,7 @@ export const TreeNode = memo(function TreeNode({ id, depth, isDragging, isDropIn
           </span>
         ) : null}
       </div>
+
     </div>
   );
 });
@@ -377,7 +381,7 @@ const actionBtnStyle: React.CSSProperties = {
   justifyContent: "center",
   background: "transparent",
   border: "none",
-  borderRadius: 5,
+  borderRadius: 8,
   cursor: "pointer",
   color: "var(--text-muted)",
   padding: 0,

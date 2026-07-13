@@ -22,12 +22,15 @@ export function TodayView() {
       {/* Header */}
       <div
         style={{
-          padding: "10px 16px",
+          padding: "12px 20px",
           borderBottom: "1px solid var(--border-subtle)",
           flexShrink: 0,
+          background: "var(--glass-toolbar-bg)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
         }}
       >
-        <h1 style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>Today</h1>
+        <h1 style={{ fontSize: 17, fontWeight: 700, color: "var(--text-primary)", margin: 0, letterSpacing: "-0.02em" }}>Today</h1>
         <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
           {format(new Date(), "EEEE, MMMM d")}
           {total > 0 && ` · ${completed} of ${total} done`}

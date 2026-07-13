@@ -212,14 +212,16 @@ export function LifeTree() {
               display: "flex",
               alignItems: "center",
               gap: 6,
-              padding: "8px 16px",
+              padding: "9px 20px",
               background: "var(--accent)",
               color: "white",
               border: "none",
-              borderRadius: 8,
+              borderRadius: 22,
               cursor: "pointer",
               fontSize: 14,
+              fontWeight: 500,
               fontFamily: "inherit",
+              boxShadow: "0 4px 16px rgba(217,119,6,0.28), 0 1px 4px rgba(217,119,6,0.16)",
             }}
           >
             <Plus size={14} />
@@ -243,13 +245,16 @@ export function LifeTree() {
         {/* Tree toolbar */}
         <div
           style={{
-            padding: "10px 16px",
+            padding: "12px 20px",
             borderBottom: "1px solid var(--border-subtle)",
             flexShrink: 0,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             gap: 8,
+            background: "var(--glass-toolbar-bg)",
+            backdropFilter: "blur(20px) saturate(180%)",
+            WebkitBackdropFilter: "blur(20px) saturate(180%)",
           }}
         >
           <h1 style={viewHeadingStyle}>Life</h1>
@@ -261,15 +266,17 @@ export function LifeTree() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 4,
-                padding: "3px 9px",
-                background: "transparent",
-                border: "1px solid var(--border)",
-                borderRadius: "var(--radius-sm)",
+                gap: 5,
+                padding: "5px 12px",
+                background: "var(--accent-subtle)",
+                border: "1px solid rgba(217, 119, 6, 0.22)",
+                borderRadius: 20,
                 cursor: "pointer",
                 fontSize: 12,
-                color: "var(--text-secondary)",
+                fontWeight: 500,
+                color: "var(--accent)",
                 fontFamily: "inherit",
+                transition: "all 150ms",
               }}
             >
               <Plus size={12} />
@@ -287,17 +294,30 @@ export function LifeTree() {
             height: 28,
             borderBottom: "1px solid var(--border-subtle)",
             flexShrink: 0,
+            background: "var(--glass-col-bg)",
           }}
         >
-          <div style={{ flex: 1 }} />
           <div
             style={{
-              width: COL_PROGRESS,
-              fontSize: 10,
+              flex: 1,
+              fontSize: 11,
               fontWeight: 600,
               color: "var(--text-muted)",
               textTransform: "uppercase",
-              letterSpacing: "0.06em",
+              letterSpacing: "0.05em",
+              paddingLeft: 52,
+            }}
+          >
+            Task
+          </div>
+          <div
+            style={{
+              width: COL_PROGRESS,
+              fontSize: 11,
+              fontWeight: 600,
+              color: "var(--text-muted)",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
               paddingRight: 8,
             }}
           >
@@ -306,11 +326,11 @@ export function LifeTree() {
           <div
             style={{
               width: COL_TODAY,
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: 600,
               color: "var(--text-muted)",
               textTransform: "uppercase",
-              letterSpacing: "0.06em",
+              letterSpacing: "0.05em",
               textAlign: "center",
             }}
           >
@@ -319,11 +339,11 @@ export function LifeTree() {
           <div
             style={{
               width: COL_DUE,
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: 600,
               color: "var(--text-muted)",
               textTransform: "uppercase",
-              letterSpacing: "0.06em",
+              letterSpacing: "0.05em",
               paddingRight: 8,
             }}
           >
@@ -398,25 +418,30 @@ export function LifeTree() {
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
-                margin: "6px 12px",
-                padding: "6px 8px",
+                margin: "8px 14px",
+                padding: "7px 12px",
                 background: "transparent",
-                border: "none",
-                borderRadius: 7,
+                border: "1px dashed var(--border)",
+                borderRadius: 14,
                 cursor: "pointer",
                 fontSize: 13,
                 color: "var(--text-muted)",
                 fontFamily: "inherit",
-                width: "calc(100% - 24px)",
+                width: "calc(100% - 28px)",
                 textAlign: "left",
+                transition: "all 150ms",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = "var(--text-secondary)";
-                (e.currentTarget as HTMLButtonElement).style.background = "var(--bg-node-hover)";
+                const el = e.currentTarget as HTMLButtonElement;
+                el.style.color = "var(--accent)";
+                el.style.borderColor = "rgba(217,119,6,0.28)";
+                el.style.background = "rgba(217,119,6,0.05)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = "var(--text-muted)";
-                (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                const el = e.currentTarget as HTMLButtonElement;
+                el.style.color = "var(--text-muted)";
+                el.style.borderColor = "var(--border)";
+                el.style.background = "transparent";
               }}
             >
               <Plus size={13} />
@@ -435,11 +460,13 @@ export function LifeTree() {
               display: "flex",
               alignItems: "center",
               gap: 6,
-              padding: "0 12px 0 10px",
-              background: "var(--bg-app)",
-              border: "1px solid var(--accent)",
-              borderRadius: 8,
-              boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+              padding: "0 16px 0 12px",
+              background: "var(--glass-modal-bg)",
+              backdropFilter: "blur(32px) saturate(180%)",
+              WebkitBackdropFilter: "blur(32px) saturate(180%)",
+              border: "1px solid var(--glass-modal-border)",
+              borderRadius: 16,
+              boxShadow: "0 8px 32px rgba(28,25,23,0.14), 0 2px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1)",
               fontSize: 14,
               color: "var(--text-primary)",
               fontFamily: "var(--font-sans, sans-serif)",
@@ -447,7 +474,7 @@ export function LifeTree() {
               userSelect: "none",
               minWidth: 160,
               maxWidth: 320,
-              opacity: 0.95,
+              opacity: 0.98,
             }}
           >
             <GripVertical size={11} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
@@ -481,8 +508,9 @@ export function LifeTree() {
 }
 
 const viewHeadingStyle: React.CSSProperties = {
-  fontSize: 15,
-  fontWeight: 600,
+  fontSize: 17,
+  fontWeight: 700,
   color: "var(--text-primary)",
   margin: 0,
+  letterSpacing: "-0.02em",
 };

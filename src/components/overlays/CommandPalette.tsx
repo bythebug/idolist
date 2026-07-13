@@ -85,8 +85,9 @@ export function CommandPalette() {
         style={{
           position: "fixed",
           inset: 0,
-          background: "rgba(0,0,0,0.3)",
-          backdropFilter: "blur(4px)",
+          background: "rgba(0,0,0,0.18)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
           zIndex: 100,
           display: "flex",
           alignItems: "flex-start",
@@ -102,11 +103,13 @@ export function CommandPalette() {
         transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: 520,
+          width: 540,
           maxWidth: "calc(100vw - 32px)",
-          background: "var(--bg-app)",
-          border: "1px solid var(--border)",
-          borderRadius: "var(--radius-lg)",
+          background: "var(--glass-modal-bg)",
+          backdropFilter: "blur(60px) saturate(200%)",
+          WebkitBackdropFilter: "blur(60px) saturate(200%)",
+          border: "1px solid var(--glass-modal-border)",
+          borderRadius: "var(--radius-xl)",
           boxShadow: "var(--shadow-overlay)",
           zIndex: 101,
           overflow: "hidden",
@@ -134,7 +137,7 @@ export function CommandPalette() {
               background: "transparent",
               border: "none",
               outline: "none",
-              fontSize: 15,
+              fontSize: 14,
               color: "var(--text-primary)",
               fontFamily: "inherit",
             }}

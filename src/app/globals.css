@@ -1,66 +1,95 @@
 @import "tailwindcss";
 
-/* ─── Design Tokens ─────────────────────────────────────────── */
-/*
-   Notion-style color philosophy:
-   · Warm neutrals throughout — text based on #37352F, not pure black
-   · Surfaces differ only slightly — sidebar is just barely off-white
-   · Borders are gossamer rgba lines, not solid gray stripes
-   · Accent is a calm blue (#2383E2), not neon
-   · Semantic colors are muted/earthy, not iOS-bright
-   · Radius is minimal (3–8px) — Notion is sharper than Apple
-*/
+/* ─── Warm Glass Design System ───────────────────────────────── */
 :root {
-  /* ── Surfaces */
-  --bg-app:              #FFFFFF;
-  --bg-sidebar:          #FFFFFF;
-  --bg-panel:            #FFFFFF;
+  /* ── Background — warm cream with soft golden glow */
+  --bg-gradient:
+    radial-gradient(ellipse 120% 90% at 25% -5%, rgba(251, 191, 36, 0.13) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 60% at 80% 95%, rgba(249, 115, 22, 0.08) 0%, transparent 55%),
+    #FAFAF7;
 
-  /* Node / row states — warm tint, not cold black */
-  --bg-node-hover:       rgba(55, 53, 47, 0.06);
-  --bg-node-selected:    rgba(55, 53, 47, 0.11);
+  /* ── Glass surfaces — warm white */
+  --bg-app:              transparent;
+  --bg-sidebar:          rgba(255, 253, 248, 0.80);
+  --bg-panel:            rgba(255, 253, 248, 0.80);
+  --glass-blur:          blur(48px) saturate(160%);
+  --glass-border:        rgba(255, 255, 255, 0.78);
+  --glass-highlight:     inset 0 1px 0 rgba(255, 255, 255, 0.95);
 
-  /* ── Text — warm near-black hierarchy */
-  --text-primary:        #37352F;       /* Notion's signature warm near-black */
-  --text-secondary:      #6F6E69;       /* #37352F @ ~65% opacity on white */
-  --text-muted:          #9B9A97;       /* subdued — dates, counts, labels */
-  --text-placeholder:    #C4C3BE;
-  --text-completed:      #BEBDB8;
+  /* ── Contextual glass */
+  --glass-modal-bg:      rgba(255, 253, 249, 0.88);
+  --glass-modal-border:  rgba(255, 255, 255, 0.85);
+  --glass-toolbar-bg:    rgba(255, 252, 246, 0.60);
+  --glass-col-bg:        rgba(255, 252, 246, 0.40);
 
-  /* ── Borders — gossamer, barely-there */
-  --border:              rgba(55, 53, 47, 0.09);
-  --border-subtle:       rgba(55, 53, 47, 0.05);
-  --border-focus:        rgba(232, 113, 26, 0.45);
+  /* ── Interactive states */
+  --bg-node-hover:       rgba(0, 0, 0, 0.030);
+  --bg-node-selected:    rgba(217, 119, 6, 0.08);
 
-  /* ── Accent — warm orange */
-  --accent:              #E8711A;
-  --accent-hover:        #D06010;
-  --accent-subtle:       rgba(232, 113, 26, 0.10);
+  /* ── Text — warm neutrals (stone palette) */
+  --text-primary:        #1C1917;
+  --text-secondary:      #57534E;
+  --text-muted:          #A8A29E;
+  --text-placeholder:    #D6D3D1;
+  --text-completed:      #D6D3D1;
 
-  /* ── Semantic — earthy/muted Notion palette */
-  --success:             #0F7B6C;
-  --success-subtle:      rgba(15, 123, 108, 0.10);
-  --warning:             #CA8A04;
-  --warning-subtle:      rgba(217, 115, 13, 0.10);
-  --warning-subtle-2:    rgba(217, 115, 13, 0.18);
-  --danger:              #E03E3E;
-  --danger-subtle:       rgba(224, 62, 62, 0.07);
-  --danger-subtle-2:     rgba(224, 62, 62, 0.10);
-  --danger-subtle-3:     rgba(224, 62, 62, 0.14);
-  --danger-subtle-4:     rgba(224, 62, 62, 0.20);
+  /* ── Borders — warm sepia */
+  --border:              rgba(28, 25, 23, 0.08);
+  --border-subtle:       rgba(28, 25, 23, 0.05);
+  --border-focus:        rgba(217, 119, 6, 0.55);
 
-  /* ── Radius — minimal, Notion-like */
-  --radius-sm:           3px;
-  --radius:              5px;
-  --radius-lg:           8px;
+  /* ── Accent — warm amber */
+  --accent:              #D97706;
+  --accent-hover:        #B45309;
+  --accent-subtle:       rgba(217, 119, 6, 0.10);
 
-  /* ── Shadows — soft, barely present in light mode */
-  --shadow-sm:           0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow:              0 3px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-lg:           0 8px 24px rgba(0, 0, 0, 0.10), 0 2px 6px rgba(0, 0, 0, 0.05);
-  --shadow-overlay:      rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
-                         rgba(15, 15, 15, 0.10) 0px 3px 6px,
-                         rgba(15, 15, 15, 0.20) 0px 9px 24px;
+  /* ── Semantic */
+  --success:             #059669;
+  --success-subtle:      rgba(5, 150, 105, 0.10);
+  --warning:             #D97706;
+  --warning-subtle:      rgba(217, 119, 6, 0.10);
+  --warning-subtle-2:    rgba(217, 119, 6, 0.18);
+  --danger:              #DC2626;
+  --danger-subtle:       rgba(220, 38, 38, 0.07);
+  --danger-subtle-2:     rgba(220, 38, 38, 0.10);
+  --danger-subtle-3:     rgba(220, 38, 38, 0.14);
+  --danger-subtle-4:     rgba(220, 38, 38, 0.20);
+
+  /* ── Radius */
+  --radius-sm:           10px;
+  --radius:              14px;
+  --radius-lg:           20px;
+  --radius-xl:           28px;
+
+  /* ── Shadows — warm-tinted */
+  --shadow-sm:
+    0 1px 2px rgba(28, 25, 23, 0.06),
+    0 0 0 1px rgba(28, 25, 23, 0.04);
+  --shadow:
+    0 4px 16px rgba(28, 25, 23, 0.07),
+    0 1px 3px rgba(28, 25, 23, 0.04);
+  --shadow-lg:
+    0 12px 40px rgba(28, 25, 23, 0.10),
+    0 4px 12px rgba(28, 25, 23, 0.05);
+  --shadow-overlay:
+    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    0 20px 60px rgba(28, 25, 23, 0.12),
+    0 6px 20px rgba(28, 25, 23, 0.06),
+    0 0 0 1px rgba(28, 25, 23, 0.06);
+  --shadow-glass:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 8px 28px rgba(28, 25, 23, 0.08),
+    0 2px 6px rgba(28, 25, 23, 0.04),
+    0 0 0 1px rgba(28, 25, 23, 0.05);
+
+  /* ── Type scale */
+  --text-xs:   11px;
+  --text-sm:   12px;
+  --text-base: 13px;
+  --text-md:   14px;
+  --text-lg:   15px;
+  --text-xl:   17px;
+  --text-2xl:  24px;
 
   /* Layout */
   --sidebar-width:       210px;
@@ -68,55 +97,84 @@
 }
 
 [data-theme="dark"] {
-  /* ── Surfaces — Notion dark (very dark, slightly layered) */
-  --bg-app:              #191919;
-  --bg-sidebar:          #191919;
-  --bg-panel:            #191919;
+  /* ── Background — warm dark with amber glow */
+  --bg-gradient:
+    radial-gradient(ellipse 120% 90% at 20% 0%, rgba(217, 119, 6, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 60% at 80% 100%, rgba(180, 83, 9, 0.12) 0%, transparent 55%),
+    #0C0A08;
 
-  --bg-node-hover:       rgba(255, 255, 255, 0.055);
-  --bg-node-selected:    rgba(255, 255, 255, 0.10);
+  /* ── Glass surfaces — warm dark */
+  --bg-app:              transparent;
+  --bg-sidebar:          rgba(22, 18, 14, 0.84);
+  --bg-panel:            rgba(22, 18, 14, 0.84);
+  --glass-blur:          blur(48px) saturate(160%);
+  --glass-border:        rgba(255, 240, 210, 0.08);
+  --glass-highlight:     inset 0 1px 0 rgba(255, 240, 210, 0.07);
 
-  /* ── Text — white with opacity, not flat gray values */
-  --text-primary:        rgba(255, 255, 255, 0.81);   /* ≈ #CFCFCF */
-  --text-secondary:      rgba(255, 255, 255, 0.45);   /* ≈ #737373 */
-  --text-muted:          rgba(255, 255, 255, 0.28);   /* ≈ #474747 */
-  --text-placeholder:    rgba(255, 255, 255, 0.14);
-  --text-completed:      rgba(255, 255, 255, 0.18);
+  /* ── Contextual glass */
+  --glass-modal-bg:      rgba(26, 20, 14, 0.90);
+  --glass-modal-border:  rgba(255, 240, 210, 0.07);
+  --glass-toolbar-bg:    rgba(14, 11, 7, 0.55);
+  --glass-col-bg:        rgba(14, 11, 7, 0.35);
 
-  /* ── Borders — nearly invisible in dark */
-  --border:              rgba(255, 255, 255, 0.09);
-  --border-subtle:       rgba(255, 255, 255, 0.055);
-  --border-focus:        rgba(245, 146, 58, 0.50);
+  /* ── Interactive states */
+  --bg-node-hover:       rgba(255, 240, 210, 0.04);
+  --bg-node-selected:    rgba(245, 158, 11, 0.13);
 
-  /* ── Accent — warm orange for dark bg */
-  --accent:              #F5923A;
-  --accent-hover:        #FFA54E;
-  --accent-subtle:       rgba(245, 146, 58, 0.15);
+  /* ── Text */
+  --text-primary:        rgba(255, 248, 235, 0.92);
+  --text-secondary:      rgba(255, 240, 210, 0.50);
+  --text-muted:          rgba(255, 240, 210, 0.28);
+  --text-placeholder:    rgba(255, 240, 210, 0.16);
+  --text-completed:      rgba(255, 240, 210, 0.18);
 
-  /* ── Semantic — lightened for dark bg */
-  --success:             #4DAB9A;
-  --success-subtle:      rgba(77, 171, 154, 0.14);
-  --warning:             #FFA344;
-  --warning-subtle:      rgba(255, 163, 68, 0.12);
-  --warning-subtle-2:    rgba(255, 163, 68, 0.20);
-  --danger:              #FF7369;
-  --danger-subtle:       rgba(255, 115, 105, 0.10);
-  --danger-subtle-2:     rgba(255, 115, 105, 0.13);
-  --danger-subtle-3:     rgba(255, 115, 105, 0.18);
-  --danger-subtle-4:     rgba(255, 115, 105, 0.24);
+  /* ── Borders */
+  --border:              rgba(255, 240, 210, 0.09);
+  --border-subtle:       rgba(255, 240, 210, 0.05);
+  --border-focus:        rgba(251, 191, 36, 0.60);
+
+  /* ── Accent */
+  --accent:              #FBBF24;
+  --accent-hover:        #FCD34D;
+  --accent-subtle:       rgba(251, 191, 36, 0.15);
+
+  /* ── Semantic */
+  --success:             #34D399;
+  --success-subtle:      rgba(52, 211, 153, 0.13);
+  --warning:             #FBBF24;
+  --warning-subtle:      rgba(251, 191, 36, 0.12);
+  --warning-subtle-2:    rgba(251, 191, 36, 0.20);
+  --danger:              #F87171;
+  --danger-subtle:       rgba(248, 113, 113, 0.09);
+  --danger-subtle-2:     rgba(248, 113, 113, 0.13);
+  --danger-subtle-3:     rgba(248, 113, 113, 0.17);
+  --danger-subtle-4:     rgba(248, 113, 113, 0.24);
 
   /* ── Shadows */
-  --shadow-sm:           0 1px 3px rgba(0, 0, 0, 0.40);
-  --shadow:              0 3px 8px rgba(0, 0, 0, 0.40), 0 1px 2px rgba(0, 0, 0, 0.30);
-  --shadow-lg:           0 8px 24px rgba(0, 0, 0, 0.50), 0 2px 6px rgba(0, 0, 0, 0.30);
-  --shadow-overlay:      rgba(15, 15, 15, 0.30) 0px 0px 0px 1px,
-                         rgba(15, 15, 15, 0.40) 0px 3px 6px,
-                         rgba(15, 15, 15, 0.60) 0px 9px 24px;
+  --shadow-sm:
+    0 1px 3px rgba(0, 0, 0, 0.50),
+    0 0 0 1px rgba(255, 240, 210, 0.03);
+  --shadow:
+    0 4px 20px rgba(0, 0, 0, 0.50),
+    0 1px 4px rgba(0, 0, 0, 0.35);
+  --shadow-lg:
+    0 12px 48px rgba(0, 0, 0, 0.60),
+    0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-overlay:
+    inset 0 1px 0 rgba(255, 240, 210, 0.07),
+    0 20px 60px rgba(0, 0, 0, 0.65),
+    0 6px 20px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 240, 210, 0.06);
+  --shadow-glass:
+    inset 0 1px 0 rgba(255, 240, 210, 0.07),
+    0 8px 28px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.40),
+    0 0 0 1px rgba(255, 240, 210, 0.04);
 }
 
 /* ─── Tailwind theme mapping ─────────────────────────────────── */
 @theme inline {
-  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
 }
 
 /* ─── Base ───────────────────────────────────────────────────── */
@@ -130,35 +188,62 @@ html, body {
 }
 
 body {
-  background: var(--bg-app);
+  background: var(--bg-gradient);
+  background-attachment: fixed;
   color: var(--text-primary);
-  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
+}
+
+/* ─── Glass utilities ────────────────────────────────────────── */
+.glass-card {
+  background: rgba(255, 253, 248, 0.76);
+  backdrop-filter: blur(32px) saturate(160%);
+  -webkit-backdrop-filter: blur(32px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.80);
+  box-shadow: var(--shadow-glass);
+  border-radius: var(--radius-lg);
+}
+
+[data-theme="dark"] .glass-card {
+  background: rgba(26, 20, 14, 0.82);
+  border: 1px solid rgba(255, 240, 210, 0.06);
 }
 
 /* ─── Scrollbar ──────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(55, 53, 47, 0.18);
+  background: rgba(28, 25, 23, 0.10);
   border-radius: 99px;
 }
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 240, 210, 0.10);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(55, 53, 47, 0.30);
+  background: rgba(28, 25, 23, 0.18);
 }
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 240, 210, 0.18);
+}
+
+/* ─── Tree node hover ────────────────────────────────────────── */
+.tree-node-row:hover {
+  background: var(--bg-node-hover) !important;
+}
+.tree-node-row:hover .drag-handle {
+  opacity: 1 !important;
+}
+.tree-node-row:hover .tree-node-actions {
+  opacity: 1 !important;
 }
 
 /* ─── Focus ─────────────────────────────────────────────────── */
@@ -168,9 +253,9 @@ body {
 }
 
 ::selection {
-  background: rgba(232, 113, 26, 0.15);
+  background: rgba(217, 119, 6, 0.14);
   color: var(--text-primary);
 }
 [data-theme="dark"] ::selection {
-  background: rgba(245, 146, 58, 0.20);
+  background: rgba(251, 191, 36, 0.20);
 }

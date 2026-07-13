@@ -17,8 +17,10 @@ export function ContextPanel() {
         height: "100%",
         overflow: "hidden",
         position: "relative",
+        borderRadius: 22,
       }}
     >
+
       {/* Always-visible: Today list */}
       <TodayPanel fillHeight />
 
@@ -35,10 +37,12 @@ export function ContextPanel() {
               position: "absolute",
               inset: 0,
               background: "var(--bg-panel)",
+              backdropFilter: "blur(48px) saturate(180%)",
+              WebkitBackdropFilter: "blur(48px) saturate(180%)",
               display: "flex",
               flexDirection: "column",
               zIndex: 10,
-              borderLeft: "1px solid var(--border)",
+              borderRadius: 22,
             }}
           >
             <NodeDetails id={selectedId} />

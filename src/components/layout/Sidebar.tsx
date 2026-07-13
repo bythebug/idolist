@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import { LifeProgressPanel } from "@/components/panels/LifeProgressPanel";
 import {
   Home,
   Sun,
@@ -16,7 +17,6 @@ import {
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
 import { selectTodayCount, selectUpcomingCount } from "@/store/selectors";
-import { LifeProgressPanel } from "@/components/panels/LifeProgressPanel";
 import type { View } from "@/types";
 import { INBOX_ID } from "@/types";
 import { parseTask } from "@/lib/nlp";
@@ -92,13 +92,16 @@ export function Sidebar() {
         flexDirection: "column",
         height: "100%",
         userSelect: "none",
+        position: "relative",
+        borderRadius: 22,
+        overflow: "hidden",
       }}
     >
       {/* User profile */}
       <button
         onClick={openSettings}
         style={{
-          padding: "12px 14px",
+          padding: "14px 14px",
           flexShrink: 0,
           display: "flex",
           alignItems: "center",
@@ -133,7 +136,7 @@ export function Sidebar() {
           <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {userName || "idolist"}
           </div>
-          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Your life, organized</div>
+          <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Your life, organized</div>
         </div>
       </button>
 
@@ -151,6 +154,73 @@ export function Sidebar() {
 
           return (
             <div key={item.id}>
+              {/* Today row: split into nav button + separate + button to avoid nesting */}
+              {isToday ? (
+                <div
+                  className="sidebar-nav-item"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    borderRadius: 12,
+                    marginBottom: 2,
+                    background: isActive ? "var(--bg-node-selected)" : "transparent",
+                    boxShadow: isActive ? "inset 0 1px 0 rgba(255,255,255,0.80), 0 1px 3px rgba(217,119,6,0.14)" : "none",
+                    transition: "background 150ms, box-shadow 150ms",
+                  }}
+                >
+                  <button
+                    onClick={() => setView("today")}
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "7px 4px 7px 10px",
+                      background: "transparent",
+                      border: "none",
+                      borderRadius: 12,
+                      cursor: "pointer",
+                      color: isActive ? "var(--accent)" : "var(--text-secondary)",
+                      fontSize: 13,
+                      fontFamily: "inherit",
+                      fontWeight: isActive ? 600 : 400,
+                      textAlign: "left",
+                    }}
+                  >
+                    <Icon size={14} />
+                    <span style={{ flex: 1 }}>Today</span>
+                    {badge > 0 && (
+                      <span style={{ fontSize: 11, fontWeight: 600, background: "var(--accent-subtle)", color: "var(--accent)", padding: "1px 6px", borderRadius: 99, minWidth: 18, textAlign: "center" }}>
+                        {badge}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    onClick={openQuickAdd}
+                    className="today-add-btn"
+                    title="Quick add to Today"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 24,
+                      height: 24,
+                      marginRight: 6,
+                      background: "transparent",
+                      border: "none",
+                      borderRadius: 4,
+                      cursor: "pointer",
+                      color: "var(--text-muted)",
+                      opacity: 0,
+                      transition: "opacity 120ms",
+                      flexShrink: 0,
+                      padding: 0,
+                    }}
+                  >
+                    <Plus size={13} />
+                  </button>
+                </div>
+              ) : (
               <button
                 onClick={() => {
                   if (item.id === "search") { openCommandPalette(); return; }
@@ -163,63 +233,31 @@ export function Sidebar() {
                   display: "flex",
                   alignItems: "center",
                   gap: 8,
-                  padding: "6px 10px",
+                  padding: "7px 10px",
                   background: isActive ? "var(--bg-node-selected)" : "transparent",
                   border: "none",
-                  borderRadius: 7,
+                  borderRadius: 12,
                   cursor: isAvailable || item.id === "search" ? "pointer" : "default",
-                  color: isActive ? "var(--text-primary)" : !isAvailable && item.id !== "search" ? "var(--text-muted)" : "var(--text-secondary)",
+                  color: isActive ? "var(--accent)" : !isAvailable && item.id !== "search" ? "var(--text-muted)" : "var(--text-secondary)",
                   fontSize: 13,
                   fontFamily: "inherit",
-                  fontWeight: isActive ? 500 : 400,
+                  fontWeight: isActive ? 600 : 400,
                   textAlign: "left",
-                  marginBottom: 1,
-                  opacity: !isAvailable && item.id !== "search" ? 0.5 : 1,
-                  position: "relative",
+                  marginBottom: 2,
+                  opacity: !isAvailable && item.id !== "search" ? 0.45 : 1,
+                  boxShadow: isActive ? "inset 0 1px 0 rgba(255,255,255,0.80), 0 1px 3px rgba(217,119,6,0.14)" : "none",
+                  transition: "background 150ms, color 150ms, box-shadow 150ms",
                 }}
               >
                 <Icon size={14} />
                 <span style={{ flex: 1 }}>{item.label}</span>
                 {badge > 0 && (
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 600,
-                      background: "var(--accent-subtle)",
-                      color: "var(--accent)",
-                      padding: "1px 6px",
-                      borderRadius: 99,
-                      minWidth: 18,
-                      textAlign: "center",
-                    }}
-                  >
+                  <span style={{ fontSize: 11, fontWeight: 600, background: "var(--accent-subtle)", color: "var(--accent)", padding: "1px 6px", borderRadius: 99, minWidth: 18, textAlign: "center" }}>
                     {badge}
                   </span>
                 )}
-                {/* + button visible on hover for Today */}
-                {isToday && (
-                  <span
-                    role="button"
-                    onClick={openQuickAdd}
-                    className="today-add-btn"
-                    title="Quick add to Today"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: 18,
-                      height: 18,
-                      borderRadius: 4,
-                      color: "var(--text-muted)",
-                      opacity: 0,
-                      transition: "opacity 120ms",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <Plus size={13} />
-                  </span>
-                )}
               </button>
+              )}
 
               {/* Inline quick-add — only for Today */}
               {isToday && quickAddOpen && (
@@ -232,7 +270,7 @@ export function Sidebar() {
                     padding: "5px 8px",
                     background: "var(--bg-node-hover)",
                     border: "1px solid var(--border)",
-                    borderRadius: 6,
+                    borderRadius: 12,
                   }}
                 >
                   <Sun size={11} style={{ color: "var(--accent)", flexShrink: 0 }} />
@@ -282,15 +320,16 @@ export function Sidebar() {
             display: "flex",
             alignItems: "center",
             gap: 8,
-            padding: "6px 10px",
+            padding: "7px 10px",
             background: "transparent",
             border: "none",
-            borderRadius: 7,
+            borderRadius: 12,
             cursor: "pointer",
             color: "var(--text-muted)",
             fontSize: 13,
             fontFamily: "inherit",
             textAlign: "left",
+            transition: "color 150ms",
           }}
         >
           <Settings size={14} />
@@ -299,6 +338,7 @@ export function Sidebar() {
       </div>
 
       <style>{`
+        .sidebar-nav-item:hover { background: var(--bg-node-hover) !important; }
         .sidebar-nav-item:hover .today-add-btn { opacity: 1 !important; }
       `}</style>
     </aside>

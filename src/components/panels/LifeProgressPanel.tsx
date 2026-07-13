@@ -7,14 +7,14 @@ import { getSubtreeCompletionRatio } from "@/lib/tree";
 
 // Stable colors for root areas (cycles if more than 8)
 const AREA_COLORS = [
-  "#5B8CF5", // blue
-  "#10B981", // green
-  "#8B5CF6", // purple
-  "#F59E0B", // amber
-  "#EC4899", // pink
-  "#06B6D4", // cyan
-  "#EF4444", // red
-  "#84CC16", // lime
+  "#D97706", // amber
+  "#EA580C", // orange
+  "#DC2626", // rose
+  "#059669", // emerald
+  "#0891B2", // cyan
+  "#7C3AED", // violet
+  "#DB2777", // pink
+  "#65A30D", // lime
 ];
 
 export function LifeProgressPanel() {
@@ -73,7 +73,7 @@ export function LifeProgressPanel() {
       <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 4 }}>
         <span
           style={{
-            fontSize: 32,
+            fontSize: 24,
             fontWeight: 700,
             color: "var(--text-primary)",
             letterSpacing: "-0.02em",
