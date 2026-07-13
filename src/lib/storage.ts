@@ -1,36 +1,22 @@
-import type { LifeNode, View } from "@/types";
-import { createSeedData } from "./seed";
+import {
+  SCHEMA_VERSION,
+  normalizePersistedState,
+  todayStr,
+  type PersistedState,
+  type StorageAdapter,
+} from "@idolist/core";
 
 const STORAGE_KEY = "lifeos_v1";
-const SCHEMA_VERSION = 1;
 
-export interface PersistedState {
-  schemaVersion: number;
-  nodes: Record<string, LifeNode>;
-  rootIds: string[];
-  collapsedIds: string[];
-  todayIds: string[];
-  lastResetDate: string;
-  view: View;
-  darkMode: boolean;
-  userName?: string;
-  userAvatar?: string;
-}
-
-export function loadState(): PersistedState {
+export function loadState(): PersistedState | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultState();
+    if (!raw) return null;
     const parsed = JSON.parse(raw) as PersistedState;
-    if (parsed.schemaVersion !== SCHEMA_VERSION) return defaultState();
-    for (const node of Object.values(parsed.nodes)) {
-      if (node.repeat === undefined) node.repeat = "none";
-      if (node.lastCompletedAt === undefined) node.lastCompletedAt = null;
-      if (node.dueTime === undefined) node.dueTime = null;
-    }
-    return parsed;
+    if (parsed.schemaVersion !== SCHEMA_VERSION) return null;
+    return normalizePersistedState(parsed);
   } catch {
-    return defaultState();
+    return null;
   }
 }
 
@@ -42,23 +28,10 @@ export function saveState(state: PersistedState): void {
   }
 }
 
-function defaultState(): PersistedState {
-  const seed = createSeedData();
-  return {
-    schemaVersion: SCHEMA_VERSION,
-    nodes: seed.nodes,
-    rootIds: seed.rootIds,
-    collapsedIds: [],
-    todayIds: [],
-    lastResetDate: todayStr(),
-    view: "life",
-    darkMode: false,
-  };
-}
-
-export function todayStr(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+export const localStorageAdapter: StorageAdapter = {
+  load: loadState,
+  save: saveState,
+};
 
 export function exportData(state: PersistedState): void {
   const json = JSON.stringify(state, null, 2);

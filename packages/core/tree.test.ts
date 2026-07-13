@@ -12,7 +12,7 @@ import {
   getNextVisibleId,
   getNodeDepth,
 } from "./tree";
-import type { LifeNode } from "@/types";
+import type { LifeNode } from "./types";
 
 function makeNode(partial: Partial<LifeNode> & { id: string }): LifeNode {
   return {
@@ -24,7 +24,10 @@ function makeNode(partial: Partial<LifeNode> & { id: string }): LifeNode {
     collapsed: false,
     archived: false,
     reminder: "none",
+    repeat: "none",
+    lastCompletedAt: null,
     dueDate: null,
+    dueTime: null,
     notes: "",
     icon: null,
     createdAt: Date.now(),

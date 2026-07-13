@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { Clock } from "lucide-react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
-import { selectUpcomingNodes } from "@/store/selectors";
+import { selectUpcomingNodes } from "@idolist/core";
 import { TreeNodeCheckbox } from "@/components/tree/TreeNodeCheckbox";
 
 const GROUP_LABELS: Record<string, string> = {

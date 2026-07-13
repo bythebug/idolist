@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { Sun, Plus } from "lucide-react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
-import { selectTodayNodes } from "@/store/selectors";
+import { selectTodayNodes } from "@idolist/core";
 import { TreeNodeCheckbox } from "@/components/tree/TreeNodeCheckbox";
 
 export function TodayPanel({ fillHeight = false }: { fillHeight?: boolean }) {

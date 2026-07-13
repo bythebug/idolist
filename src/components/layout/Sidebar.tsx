@@ -16,12 +16,12 @@ import {
 } from "lucide-react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
-import { selectTodayCount, selectUpcomingCount } from "@/store/selectors";
-import type { View } from "@/types";
-import { INBOX_ID } from "@/types";
-import { parseTask } from "@/lib/nlp";
+import { selectTodayCount, selectUpcomingCount } from "@idolist/core";
+import type { View } from "@idolist/core";
+import { INBOX_ID } from "@idolist/core";
+import { parseTask } from "@idolist/core";
 
-const NAV_ITEMS: { id: View | "graph" | "calendar" | "notes"; label: string; icon: React.ComponentType<{ size?: number }>; view?: View }[] = [
+const NAV_ITEMS: { id: View | "search" | "graph" | "calendar" | "notes"; label: string; icon: React.ComponentType<{ size?: number }>; view?: View }[] = [
   { id: "life",     label: "Life",     icon: Home,       view: "life" },
   { id: "today",    label: "Today",    icon: Sun,        view: "today" },
   { id: "upcoming", label: "Upcoming", icon: Clock,      view: "upcoming" },

@@ -5,9 +5,9 @@ import { format } from "date-fns";
 import { Sun, Calendar, X } from "lucide-react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
-import { selectBreadcrumb } from "@/store/selectors";
+import { selectBreadcrumb } from "@idolist/core";
 import { TreeNodeIcon } from "@/components/tree/TreeNodeIcon";
-import type { ReminderOption, RepeatOption } from "@/types";
+import type { ReminderOption, RepeatOption } from "@idolist/core";
 
 interface Props {
   id: string;

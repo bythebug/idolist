@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import type { LifeNode } from "@/types";
+import type { LifeNode } from "./types";
 
 interface SeedResult {
   nodes: Record<string, LifeNode>;

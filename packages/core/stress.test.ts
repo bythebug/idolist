@@ -1,12 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { getVisibleNodes, getSubtree, isDescendant, getParentChain } from "./tree";
-import type { LifeNode } from "@/types";
+import type { LifeNode } from "./types";
 
 function makeNode(id: string, parentId: string | null, childIds: string[]): LifeNode {
   return {
     id, title: `Node ${id}`, type: "task", parentId, childIds,
     completed: false, archived: false, collapsed: false,
-    reminder: "none", dueDate: null, notes: "", icon: null,
+    reminder: "none", repeat: "none", lastCompletedAt: null,
+    dueDate: null, dueTime: null, notes: "", icon: null,
     createdAt: 0, updatedAt: 0,
   };
 }

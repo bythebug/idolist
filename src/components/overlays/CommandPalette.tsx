@@ -6,8 +6,8 @@ import Fuse from "fuse.js";
 import { Search } from "lucide-react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
-import { selectSearchIndex } from "@/store/selectors";
-import type { SearchResult } from "@/types";
+import { selectSearchIndex } from "@idolist/core";
+import type { SearchResult } from "@idolist/core";
 
 export function CommandPalette() {
   const [query, setQuery] = useState("");

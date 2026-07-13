@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Moon, Sun, Download, Upload, Trash2, X } from "lucide-react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
-import { exportData, loadState, saveState } from "@/lib/storage";
+import { exportData, saveState } from "@/lib/storage";
 
 const VERSION = "1.0.0";
 

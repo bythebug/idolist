@@ -1,10 +1,10 @@
-import type { LifeNode, VisibleNode, SearchResult } from "@/types";
-import { INBOX_ID } from "@/types";
+import type { LifeNode, VisibleNode, SearchResult } from "./types";
+import { INBOX_ID } from "./types";
 import {
   getVisibleNodes,
   getParentChain,
   getCompletionRatio,
-} from "@/lib/tree";
+} from "./tree";
 import { addDays, isAfter, isBefore, startOfDay } from "date-fns";
 
 export function selectVisibleNodes(

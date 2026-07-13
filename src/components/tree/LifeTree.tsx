@@ -16,8 +16,8 @@ import {
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
-import { selectVisibleNodes } from "@/store/selectors";
-import { isDescendant } from "@/lib/tree";
+import { selectVisibleNodes } from "@idolist/core";
+import { isDescendant } from "@idolist/core";
 import { TreeNode, COL_PROGRESS, COL_TODAY, COL_DUE } from "./TreeNode";
 import { TreeDropIndicator } from "./TreeDropIndicator";
 

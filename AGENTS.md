@@ -1,5 +1,11 @@
 # Agent Instructions — idolist
 
+## Repo layout (monorepo since Phase 35)
+
+- `packages/core` — `@idolist/core`: types, pure tree utilities, NLP, seed data, selectors, and the Zustand store factory `createIdolistStore(adapter)`. Platform-agnostic; shared by web and (future) mobile. Ships raw TS via npm workspaces — no build step.
+- `src/` — the Next.js web app. Web-only glue lives in `src/store/index.ts` (store instance with `localStorageAdapter`) and `src/lib/storage.ts` (localStorage adapter + export/import).
+- Import shared code from `@idolist/core`, never via relative paths into `packages/core`.
+
 ## Framework version
 
 This project uses **Next.js 16.2.10** with the App Router. APIs and conventions differ from what most models have in training data. Before writing any Next.js code, read the relevant guide in `node_modules/next/dist/docs/`. Heed deprecation notices.
@@ -113,7 +119,7 @@ Three-column CSS grid: `var(--sidebar-width) 1fr var(--panel-width)`
 
 ## Pure utility functions
 
-`src/lib/tree.ts` — no store imports. All functions are pure:
+`packages/core/tree.ts` — no store imports. All functions are pure:
 - `getVisibleNodes(nodes, rootIds, collapsedIds, view)` — flattened list for virtualizer
 - `getSubtree(nodes, id)` — id + all descendants
 - `getSubtreeCompletionRatio(nodes, id)` — leaf-based ratio
@@ -139,7 +145,8 @@ Dark mode via `data-theme="dark"` on `<html>` — all vars redeclared in `[data-
 
 ## What NOT to do
 
-- Do not import store directly in `src/lib/tree.ts` — pure functions only
+- Do not import store directly in `packages/core/tree.ts` — pure functions only
+- Do not touch `localStorage` (or any platform API) inside `packages/core` — persistence goes through the injected `StorageAdapter`
 - Do not return `{}` or `[]` literals from `useStore()` selectors — always `useShallow`
 - Do not compute derived arrays inside `useStore()` — use `useMemo` outside
 - Do not hardcode colors — use CSS vars

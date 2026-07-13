@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { format } from "date-fns";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
-import { selectTodayNodes } from "@/store/selectors";
+import { selectTodayNodes } from "@idolist/core";
 import { TreeNode } from "@/components/tree/TreeNode";
 
 export function TodayView() {

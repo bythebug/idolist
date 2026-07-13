@@ -5,10 +5,10 @@ import { format } from "date-fns";
 import { Plus, Check, Trash2, ArrowRight, Calendar } from "lucide-react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
-import { INBOX_ID } from "@/types";
-import type { LifeNode } from "@/types";
+import { INBOX_ID } from "@idolist/core";
+import type { LifeNode } from "@idolist/core";
 import { TreeNodeCheckbox } from "@/components/tree/TreeNodeCheckbox";
-import { parseTask } from "@/lib/nlp";
+import { parseTask } from "@idolist/core";
 
 export function InboxView() {
   const { nodes, rootIds, addToInbox, addToToday, updateNode, toggleComplete, deleteNode, moveNode, setSelected } =

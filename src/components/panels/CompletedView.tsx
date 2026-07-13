@@ -5,8 +5,8 @@ import { format } from "date-fns";
 import { CheckCircle2, RotateCcw } from "lucide-react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
-import { getParentChain } from "@/lib/tree";
-import type { LifeNode } from "@/types";
+import { getParentChain } from "@idolist/core";
+import type { LifeNode } from "@idolist/core";
 
 interface ItemProps {
   node: LifeNode;

@@ -6,7 +6,7 @@ import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { format } from "date-fns";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
-import { getSubtreeCompletionRatio } from "@/lib/tree";
+import { getSubtreeCompletionRatio } from "@idolist/core";
 import { TreeNodeCheckbox } from "./TreeNodeCheckbox";
 import { TreeNodeTitle } from "./TreeNodeTitle";
 import { TreeNodeIcon } from "./TreeNodeIcon";

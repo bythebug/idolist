@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
-import { getSubtreeCompletionRatio } from "@/lib/tree";
+import { getSubtreeCompletionRatio } from "@idolist/core";
 
 // Stable colors for root areas (cycles if more than 8)
 const AREA_COLORS = [

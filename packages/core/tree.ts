@@ -1,4 +1,4 @@
-import type { LifeNode, VisibleNode } from "@/types";
+import type { LifeNode, VisibleNode } from "./types";
 
 export function getNode(
   nodes: Record<string, LifeNode>,

@@ -44,6 +44,7 @@ idolist is a personal operating system — a single-page application built aroun
 ✅ Phase 32 — Inbox view (working full page, __inbox__ hidden root, quick-capture, move to area)
 ✅ Phase 33 — NLP date parsing in Inbox (chrono-node, live preview chip, date stripped from title)
 ✅ Phase 34 — Time support (dueTime field, NLP extracts explicit hour, shown in Today/Upcoming/Inbox/tree)
+✅ Phase 35 — Monorepo setup + shared core (@idolist/core via npm workspaces, StorageAdapter injection)
 ```
 
 ---
@@ -163,6 +164,17 @@ const AppShell = dynamic(() => import("@/components/layout/AppShell"), { ssr: fa
 ## Folder Structure (actual)
 
 ```
+packages/
+└── core/                   ✅ @idolist/core — shared web/mobile (npm workspace, raw TS)
+    ├── index.ts            ✅ Public barrel — re-exports everything below
+    ├── types.ts            ✅ LifeNode, View, INBOX_ID, SearchResult, DragState, …
+    ├── tree.ts             ✅ Pure utilities (+ tree.test.ts, stress.test.ts)
+    ├── nlp.ts              ✅ chrono-node date/time parsing
+    ├── seed.ts             ✅ Sample tree
+    ├── selectors.ts        ✅ selectVisibleNodes, selectUpcomingNodes, …
+    ├── storage.ts          ✅ PersistedState, StorageAdapter, normalize/default helpers
+    └── store.ts            ✅ createIdolistStore(adapter) — Zustand + Immer factory
+
 src/
 ├── app/
 │   ├── layout.tsx          ✅ Inter font, html lang
@@ -193,16 +205,11 @@ src/
 │       ├── ProgressRing.tsx ✅ SVG + Framer Motion, color tiers
 │       └── Toast.tsx        ✅ AnimatePresence slide-up, auto-dismiss 2.5s, keyed by id
 ├── store/
-│   ├── index.ts            ✅ Zustand + Immer, all actions, undo/redo, toast, debounced persist
-│   └── selectors.ts        ✅ selectVisibleNodes, selectBreadcrumb, selectUpcomingNodes, etc.
+│   └── index.ts            ✅ createIdolistStore(localStorageAdapter) — web store instance
 ├── hooks/
 │   └── useKeyboard.ts      ✅ storeRef pattern, all shortcuts, Cmd+Z/Cmd+Shift+Z
-├── lib/
-│   ├── tree.ts             ✅ Pure utilities (31 unit tests)
-│   ├── storage.ts          ✅ load/save/export, schema versioning
-│   └── seed.ts             ✅ Career/Health/Finance/Learning sample tree
-└── types/
-    └── index.ts            ✅ LifeNode, View, Command, SearchResult, DragState, HistoryEntry
+└── lib/
+    └── storage.ts          ✅ localStorageAdapter + exportData/import (web-only persistence)
 ```
 
 ---
@@ -602,7 +609,7 @@ The web app and mobile app share `packages/core`. Zero duplication of business l
 ### Phase Plan
 
 ```
-⬜ Phase 35 — Monorepo setup + shared core package
+✅ Phase 35 — Monorepo setup + shared core package
 ⬜ Phase 36 — Expo app scaffold (Bare workflow, TypeScript, Expo Router)
 ⬜ Phase 37 — Shared store wired to MMKV (local persistence, all platforms)
 ⬜ Phase 38 — Layout shell (iPhone tabs / iPad+Mac split view)
@@ -617,29 +624,41 @@ The web app and mobile app share `packages/core`. Zero duplication of business l
 
 ---
 
-### PHASE 35 — Monorepo Setup + Shared Core
+### PHASE 35 — Monorepo Setup + Shared Core ✅ DONE
 
 **Goal:** Extract all platform-agnostic code so both web and mobile import from the same package.
 
-- [ ] Add `packages/core` with its own `package.json` + `tsconfig.json`
-- [ ] Move `src/types/index.ts` → `packages/core/types.ts`
-- [ ] Move `src/lib/tree.ts` → `packages/core/tree.ts`
-- [ ] Move `src/lib/nlp.ts` → `packages/core/nlp.ts`
-- [ ] Move `src/lib/seed.ts` → `packages/core/seed.ts`
-- [ ] Move `src/store/` → `packages/core/store/` (remove localStorage calls — make storage adapter-injected)
-- [ ] Move `src/store/selectors.ts` → `packages/core/selectors.ts`
-- [ ] Update web app imports to `@idolist/core`
-- [ ] Set up Turborepo or pnpm workspaces
+- [x] Add `packages/core` with its own `package.json` + `tsconfig.json`
+- [x] Move `src/types/index.ts` → `packages/core/types.ts`
+- [x] Move `src/lib/tree.ts` → `packages/core/tree.ts` (tests moved alongside: `tree.test.ts`, `stress.test.ts`)
+- [x] Move `src/lib/nlp.ts` → `packages/core/nlp.ts`
+- [x] Move `src/lib/seed.ts` → `packages/core/seed.ts`
+- [x] Store extracted to `packages/core/store.ts` as `createIdolistStore(adapter)` factory — no localStorage calls in core
+- [x] Move `src/store/selectors.ts` → `packages/core/selectors.ts`
+- [x] `packages/core/storage.ts` — `PersistedState`, `StorageAdapter`, `normalizePersistedState`, `defaultPersistedState`, `todayStr`
+- [x] Update web app imports to `@idolist/core`
+- [x] Set up npm workspaces (not Turborepo/pnpm — repo already used npm; root `workspaces: ["packages/*"]`)
 
 **Key decision:** The store's persistence is injected as an adapter interface:
 ```typescript
 interface StorageAdapter {
-  load(): Promise<SerializedState | null>;
-  save(state: SerializedState): Promise<void>;
+  load(): PersistedState | null;
+  save(state: PersistedState): void;
 }
-// Web: localStorageAdapter
+// Web: localStorageAdapter (src/lib/storage.ts)
 // Mobile: mmkvAdapter (local) + cloudKitAdapter (sync)
 ```
+
+**Divergence from original sketch:** the adapter is synchronous, not Promise-based —
+localStorage and MMKV are both sync APIs, and the store initializes synchronously at
+creation. CloudKit (Phase 43) layers async sync behind the sync MMKV cache; its adapter
+`save` can fire-and-forget the network push.
+
+**Web-side remainder:**
+- `src/store/index.ts` — thin shim: `createIdolistStore(localStorageAdapter)`, re-exports `IdolistStore`
+- `src/lib/storage.ts` — `localStorageAdapter` + `exportData` (browser download) + `loadState`/`saveState` used by Settings import/export
+- Next.js needs no `transpilePackages` entry — Turbopack transpiles npm workspace packages automatically (verified in `node_modules/next/dist/docs`)
+- Core ships raw TS (`main`/`exports` → `index.ts`); no build step
 
 ---
 
@@ -797,7 +816,7 @@ Record Type: AppState
 
 ## Critical Rules
 
-1. **Tree utility functions are pure** — no store imports in `src/lib/tree.ts`.
+1. **Tree utility functions are pure** — no store imports in `packages/core/tree.ts`.
 2. **Flat node map is sacred** — never nest nodes in component state.
 3. **useShallow on all object selectors** — never return `{}` or `[]` directly from a selector.
 4. **Derived arrays go in useMemo** — not inside useStore selectors.

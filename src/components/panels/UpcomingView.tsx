@@ -5,9 +5,9 @@ import { format, isToday, isTomorrow } from "date-fns";
 import { AlertTriangle, Calendar, Clock } from "lucide-react";
 import { useStore } from "@/store";
 import { useShallow } from "zustand/react/shallow";
-import { selectUpcomingNodes } from "@/store/selectors";
-import { getParentChain } from "@/lib/tree";
-import type { LifeNode } from "@/types";
+import { selectUpcomingNodes } from "@idolist/core";
+import { getParentChain } from "@idolist/core";
+import type { LifeNode } from "@idolist/core";
 
 interface ItemProps {
   node: LifeNode;

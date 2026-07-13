@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { useStore, type IdolistStore } from "@/store";
-import { selectVisibleNodes } from "@/store/selectors";
-import { getNextVisibleId, getPreviousVisibleId } from "@/lib/tree";
+import { selectVisibleNodes } from "@idolist/core";
+import { getNextVisibleId, getPreviousVisibleId } from "@idolist/core";
 
 export function useKeyboard() {
   // Ref always holds the latest store snapshot — avoids stale closure and
