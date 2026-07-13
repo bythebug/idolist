@@ -515,6 +515,286 @@ src/
 
 ---
 
+---
+
+## React Native — iPhone / iPad / Mac
+
+### Goal
+
+A native-feeling idolist app on all Apple devices, sharing the same business logic as the web app, with persistent storage and real-time iCloud sync across devices.
+
+---
+
+### Architecture Decision: Monorepo
+
+```
+idolist/                        ← existing Next.js web app
+packages/
+  core/                         ← shared: types, store, tree.ts, nlp.ts, seed.ts
+apps/
+  mobile/                       ← Expo React Native app
+```
+
+The web app and mobile app share `packages/core`. Zero duplication of business logic. The UI layer is rebuilt per platform but the entire store, selectors, utilities, and NLP are identical.
+
+---
+
+### Technology Stack — Mobile
+
+| Concern | Choice | Notes |
+|---|---|---|
+| Framework | Expo SDK 52+ (Bare workflow) | Bare needed for native CloudKit module |
+| Language | TypeScript strict | Same tsconfig as web |
+| Navigation | Expo Router (file-based) | Same mental model as Next.js App Router |
+| State | Zustand + Immer | Identical to web — no changes |
+| Local storage | MMKV + zustand-mmkv-storage | 10× faster than AsyncStorage |
+| Sync | CloudKit (custom Expo module) | Native Apple sync, zero backend cost |
+| Virtualization | FlashList (Shopify) | Replaces @tanstack/react-virtual |
+| Animations | React Native Reanimated 3 | Replaces Framer Motion |
+| Gestures | React Native Gesture Handler | Drag-and-drop + swipe |
+| Glass effect | @react-native-community/blur | BlurView replaces backdrop-filter |
+| Icons | Lucide React Native | Same icon set |
+| Notifications | expo-notifications | Local only, no server |
+| Date parsing | chrono-node | Same NLP lib, works in RN |
+
+---
+
+### iCloud Sync Strategy
+
+**CloudKit** is the right choice — native Apple infrastructure, zero server cost, works offline with automatic delta sync when connectivity returns.
+
+**How it works:**
+- Each `LifeNode` becomes a `CKRecord` in a private CloudKit database
+- `rootIds` stored as a separate `CKRecord` (ordered array)
+- `collapsedIds`, `todayIds` stored as record fields
+- CloudKit subscriptions push real-time change notifications to all signed-in devices
+- Conflict resolution: `updatedAt` timestamp — last write wins (sufficient for personal use)
+- Offline writes queue locally in MMKV, sync on reconnect automatically
+
+**Implementation:** Custom Expo native module wrapping `CKContainer`, `CKDatabase`, and `CKQuerySubscription`. The store's `persist` middleware is replaced by a CloudKit adapter that writes on every mutation and subscribes to remote changes.
+
+---
+
+### Layout Strategy Per Device
+
+**iPhone**
+- Tab bar at bottom: Life · Today · Inbox · Upcoming
+- Tapping a node opens NodeDetails as a pushed screen
+- Tree is single-column (progress + today + due columns collapse to swipe actions)
+- Quick-add via floating action button
+
+**iPad**
+- `UISplitViewController` equivalent via Expo Router groups
+- Left column: Sidebar (210px, persistent)
+- Center: Tree (flex 1)
+- Right column: Context panel (260px, persistent)
+- Matches web layout exactly — same three-column glass card design
+- Keyboard shortcuts via `UIKeyCommand`
+
+**Mac (Catalyst via Expo)**
+- Same as iPad layout
+- Toolbar integrates with macOS title bar
+- `Cmd+K`, `Cmd+Z`, all keyboard shortcuts work natively
+- Window resizing supported
+
+---
+
+### Phase Plan
+
+```
+⬜ Phase 35 — Monorepo setup + shared core package
+⬜ Phase 36 — Expo app scaffold (Bare workflow, TypeScript, Expo Router)
+⬜ Phase 37 — Shared store wired to MMKV (local persistence, all platforms)
+⬜ Phase 38 — Layout shell (iPhone tabs / iPad+Mac split view)
+⬜ Phase 39 — Design system (JS theme tokens, BlurView glass, warm palette)
+⬜ Phase 40 — Tree rendering (FlashList, TreeNode in RN, column layout)
+⬜ Phase 41 — Inline editing + keyboard (TextInput, KeyboardAvoidingView, hardware kbd)
+⬜ Phase 42 — Gestures + drag-and-drop (Reanimated 3 + Gesture Handler)
+⬜ Phase 43 — iCloud sync (CloudKit native module, CKRecord per node, subscriptions)
+⬜ Phase 44 — Push notifications + reminders (expo-notifications, local scheduling)
+⬜ Phase 45 — App Store submission (icons, splash, TestFlight, review)
+```
+
+---
+
+### PHASE 35 — Monorepo Setup + Shared Core
+
+**Goal:** Extract all platform-agnostic code so both web and mobile import from the same package.
+
+- [ ] Add `packages/core` with its own `package.json` + `tsconfig.json`
+- [ ] Move `src/types/index.ts` → `packages/core/types.ts`
+- [ ] Move `src/lib/tree.ts` → `packages/core/tree.ts`
+- [ ] Move `src/lib/nlp.ts` → `packages/core/nlp.ts`
+- [ ] Move `src/lib/seed.ts` → `packages/core/seed.ts`
+- [ ] Move `src/store/` → `packages/core/store/` (remove localStorage calls — make storage adapter-injected)
+- [ ] Move `src/store/selectors.ts` → `packages/core/selectors.ts`
+- [ ] Update web app imports to `@idolist/core`
+- [ ] Set up Turborepo or pnpm workspaces
+
+**Key decision:** The store's persistence is injected as an adapter interface:
+```typescript
+interface StorageAdapter {
+  load(): Promise<SerializedState | null>;
+  save(state: SerializedState): Promise<void>;
+}
+// Web: localStorageAdapter
+// Mobile: mmkvAdapter (local) + cloudKitAdapter (sync)
+```
+
+---
+
+### PHASE 36 — Expo App Scaffold
+
+- [ ] `npx create-expo-app apps/mobile --template bare-minimum`
+- [ ] TypeScript strict config (matches web)
+- [ ] Expo Router installed and configured
+- [ ] Expo SDK 52+ (Bare workflow — required for native CloudKit module)
+- [ ] `react-native-gesture-handler` + `react-native-reanimated` installed
+- [ ] `@shopify/flash-list` installed
+- [ ] `react-native-mmkv` installed
+- [ ] EAS Build configured for iOS simulator and device
+
+---
+
+### PHASE 37 — Shared Store + MMKV Persistence
+
+- [ ] `zustand` + `immer` work in RN unchanged — install and verify
+- [ ] `mmkvAdapter` implementing `StorageAdapter` interface
+- [ ] Store loads from MMKV on app start (replaces `loadState` from localStorage)
+- [ ] Debounced save to MMKV on every mutation (replaces `debounce(saveState, 300)`)
+- [ ] All existing selectors work unchanged
+- [ ] Seed data inserted on first launch (MMKV key not present)
+
+---
+
+### PHASE 38 — Layout Shell
+
+**iPhone:**
+- [ ] Bottom tab bar: Life / Today / Inbox / Upcoming
+- [ ] Stack navigator inside each tab
+- [ ] `_layout.tsx` at root with `Tabs` component from Expo Router
+
+**iPad + Mac:**
+- [ ] Detect `Platform.isPad` / `Platform.OS === 'macos'`
+- [ ] Three-column layout using `View` flexbox (sidebar + tree + panel)
+- [ ] Sidebar persistent (not in a drawer)
+- [ ] Sidebar collapses to icon-only at narrow widths
+
+---
+
+### PHASE 39 — Design System
+
+- [ ] `theme.ts` — all CSS vars translated to JS constants (warm white palette)
+- [ ] `BlurView` from `@react-native-community/blur` for glass panels
+- [ ] Warm cream background via `LinearGradient` (`expo-linear-gradient`)
+- [ ] Border radius, shadow, spacing constants matching web
+- [ ] Dark mode via `Appearance.getColorScheme()` + React context
+- [ ] All components consume theme object — no hardcoded colors
+
+---
+
+### PHASE 40 — Tree Rendering
+
+- [ ] `FlashList` replaces `@tanstack/react-virtual` — same `estimateItemSize: 40`
+- [ ] `TreeNode` component adapted: `View`/`Text`/`TouchableOpacity` replacing `div`/`span`/`button`
+- [ ] Progress bar: `View` with percentage width
+- [ ] Today toggle: `Pressable` with sun icon
+- [ ] Due date: `Text` with formatted date
+- [ ] Collapse toggle: `Pressable` with `ChevronRight` (Reanimated rotation)
+- [ ] On iPhone: Progress/Today/Due collapse — swipe-left reveals actions instead
+
+---
+
+### PHASE 41 — Inline Editing + Keyboard
+
+- [ ] `TextInput` for node title editing (autoFocus on `editingId` set)
+- [ ] `KeyboardAvoidingView` wrapping tree (iPhone software keyboard)
+- [ ] `returnKeyType="next"` → Tab behavior (create sibling)
+- [ ] Hardware keyboard on iPad/Mac: arrow keys, Enter, Escape, Cmd+Z via `UIKeyCommand`
+- [ ] Command palette: `Modal` + `TextInput` + `FlashList` (Cmd+K on iPad/Mac, search FAB on iPhone)
+
+---
+
+### PHASE 42 — Gestures + Drag-and-Drop
+
+- [ ] `react-native-gesture-handler` `LongPressGesture` activates drag (500ms threshold)
+- [ ] `react-native-reanimated` `useAnimatedStyle` for ghost overlay position
+- [ ] `GestureDetector` + `Animated.View` ghost follows finger
+- [ ] Drop indicators (line above/below/inside) using `useSharedValue` for opacity
+- [ ] `computeDropTarget` logic reused unchanged from web
+- [ ] Haptic feedback on drag start and valid drop (`expo-haptics`)
+
+---
+
+### PHASE 43 — iCloud Sync
+
+This is the most complex phase. Requires a custom Expo native module.
+
+**Native module (Swift):**
+- [ ] `CloudKitModule.swift` wrapping `CKContainer.default()`
+- [ ] `saveRecord(node: LifeNode)` — upsert a `CKRecord` with all node fields
+- [ ] `deleteRecord(id: String)` — delete by record ID
+- [ ] `fetchAllRecords()` — initial fetch on launch
+- [ ] `subscribeToChanges()` — `CKQuerySubscription` fires on remote changes
+- [ ] `applyRemoteChanges(records: [CKRecord])` — merges into Zustand store
+
+**Store integration:**
+- [ ] CloudKit adapter implements `StorageAdapter` interface
+- [ ] On mutation: write to MMKV immediately (optimistic), then push to CloudKit async
+- [ ] On app foreground: fetch delta changes since last sync token (`CKServerChangeToken`)
+- [ ] Conflict resolution: compare `updatedAt` — higher timestamp wins
+- [ ] Sync status indicator in sidebar (syncing / synced / offline)
+
+**CloudKit schema:**
+```
+Record Type: Node
+  id: String (record name)
+  title: String
+  type: String
+  parentId: String?
+  childIds: [String]
+  completed: Int (0/1)
+  archived: Int (0/1)
+  icon: String?
+  notes: String
+  dueDate: String?
+  dueTime: String?
+  reminder: String
+  repeat: String
+  createdAt: Double
+  updatedAt: Double
+
+Record Type: AppState
+  rootIds: [String]
+  todayIds: [String]
+  collapsedIds: [String]
+```
+
+---
+
+### PHASE 44 — Notifications + Reminders
+
+- [ ] `expo-notifications` installed and permissions requested on first launch
+- [ ] When `reminder` set on a node: schedule local notification for due date/time
+- [ ] When reminder cleared or node completed: cancel scheduled notification
+- [ ] Background task (`expo-background-fetch`) to refresh repeating task state
+- [ ] Notification tap → deep link to node via Expo Router
+
+---
+
+### PHASE 45 — App Store Submission
+
+- [ ] App icon (1024×1024, warm amber gradient + idolist mark)
+- [ ] Splash screen (`expo-splash-screen`, warm cream background)
+- [ ] Privacy policy URL (required for iCloud entitlement)
+- [ ] `iCloud` entitlement + `CloudKit` capability in `app.json`
+- [ ] EAS Build: `eas build --platform ios --profile production`
+- [ ] TestFlight internal testing
+- [ ] App Store Connect listing + screenshots
+- [ ] App Store review submission
+
+---
+
 ## Critical Rules
 
 1. **Tree utility functions are pure** — no store imports in `src/lib/tree.ts`.
