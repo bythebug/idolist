@@ -2,8 +2,9 @@
 
 ## Repo layout (monorepo since Phase 35)
 
-- `packages/core` — `@idolist/core`: types, pure tree utilities, NLP, seed data, selectors, and the Zustand store factory `createIdolistStore(adapter)`. Platform-agnostic; shared by web and (future) mobile. Ships raw TS via npm workspaces — no build step.
+- `packages/core` — `@idolist/core`: types, pure tree utilities, NLP, seed data, selectors, and the Zustand store factory `createIdolistStore(adapter)`. Platform-agnostic; shared by web and mobile. Ships raw TS via npm workspaces — no build step.
 - `src/` — the Next.js web app. Web-only glue lives in `src/store/index.ts` (store instance with `localStorageAdapter`) and `src/lib/storage.ts` (localStorage adapter + export/import).
+- `apps/mobile` — `@idolist/mobile`: Expo SDK 57 app (Bare workflow, Expo Router). Read `apps/mobile/AGENTS.md` before writing Expo code. Keep `react` pinned to the same version as the web app so npm dedupes to a single copy.
 - Import shared code from `@idolist/core`, never via relative paths into `packages/core`.
 
 ## Framework version

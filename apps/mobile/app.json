@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "idolist",
+    "slug": "idolist",
+    "version": "0.1.0",
+    "scheme": "idolist",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.idolist.app",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.idolist.app"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

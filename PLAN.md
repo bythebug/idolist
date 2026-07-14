@@ -6,7 +6,7 @@ idolist is a personal operating system — a single-page application built aroun
 
 ---
 
-## Current Status — Updated 2026-07-08
+## Current Status — Updated 2026-07-13
 
 ```
 ✅ Phase 0  — Bootstrap + tooling
@@ -45,6 +45,7 @@ idolist is a personal operating system — a single-page application built aroun
 ✅ Phase 33 — NLP date parsing in Inbox (chrono-node, live preview chip, date stripped from title)
 ✅ Phase 34 — Time support (dueTime field, NLP extracts explicit hour, shown in Today/Upcoming/Inbox/tree)
 ✅ Phase 35 — Monorepo setup + shared core (@idolist/core via npm workspaces, StorageAdapter injection)
+✅ Phase 36 — Expo app scaffold (apps/mobile, SDK 57 bare, Expo Router, reanimated/flash-list/mmkv, EAS profiles)
 ```
 
 ---
@@ -610,7 +611,7 @@ The web app and mobile app share `packages/core`. Zero duplication of business l
 
 ```
 ✅ Phase 35 — Monorepo setup + shared core package
-⬜ Phase 36 — Expo app scaffold (Bare workflow, TypeScript, Expo Router)
+✅ Phase 36 — Expo app scaffold (Bare workflow, TypeScript, Expo Router)
 ⬜ Phase 37 — Shared store wired to MMKV (local persistence, all platforms)
 ⬜ Phase 38 — Layout shell (iPhone tabs / iPad+Mac split view)
 ⬜ Phase 39 — Design system (JS theme tokens, BlurView glass, warm palette)
@@ -662,16 +663,25 @@ creation. CloudKit (Phase 43) layers async sync behind the sync MMKV cache; its 
 
 ---
 
-### PHASE 36 — Expo App Scaffold
+### PHASE 36 — Expo App Scaffold ✅ DONE
 
-- [ ] `npx create-expo-app apps/mobile --template bare-minimum`
-- [ ] TypeScript strict config (matches web)
-- [ ] Expo Router installed and configured
-- [ ] Expo SDK 52+ (Bare workflow — required for native CloudKit module)
-- [ ] `react-native-gesture-handler` + `react-native-reanimated` installed
-- [ ] `@shopify/flash-list` installed
-- [ ] `react-native-mmkv` installed
-- [ ] EAS Build configured for iOS simulator and device
+- [x] `npx create-expo-app apps/mobile --template bare-minimum` (Expo SDK 57, RN 0.86)
+- [x] TypeScript strict config (extends `expo/tsconfig.base`, `strict: true`, 0 errors)
+- [x] Expo Router installed and configured (`main: "expo-router/entry"`, `app/_layout.tsx` Stack + `app/index.tsx`, typed routes enabled)
+- [x] Expo SDK 52+ (Bare workflow — `ios/` + `android/` checked in for the Phase 43 CloudKit module)
+- [x] `react-native-gesture-handler` + `react-native-reanimated` installed (Reanimated 4 + `react-native-worklets`; `GestureHandlerRootView` at root)
+- [x] `@shopify/flash-list` installed (v2)
+- [x] `react-native-mmkv` installed (v4)
+- [x] EAS Build configured for iOS simulator and device (`eas.json`: `development`, `development-simulator`, `preview`, `production` profiles)
+
+**Divergences / notes:**
+- SDK 57 shipped since the plan was written — Expo Router is now versioned with the SDK (`~57.0.4`), and `bare-minimum` scaffolds `ios/`+`android/` directly.
+- No `babel.config.js` needed: `babel-preset-expo` auto-adds `react-native-worklets/plugin` when the package is installed.
+- `react` pinned to `19.2.4` (matching web) so npm hoists a single copy — two React instances across hoisted/nested node_modules would break hooks in `@idolist/core`'s zustand store. Verified deduped via `npm ls react`.
+- Root `workspaces` extended to `["packages/*", "apps/*"]`; Metro resolves `@idolist/core` from the workspace automatically (verified via `npx expo export --platform ios` — bundles clean).
+- Native projects regenerated via `npx expo prebuild --clean` after renaming to `idolist` / `com.idolist.app` in `app.json`.
+- `app/index.tsx` is a Phase 36 smoke-test screen (imports `createSeedData` from `@idolist/core`) — replaced by the real store + tree in Phases 37–40.
+- Remaining manual step before first cloud build: `eas init` (requires Expo account login) to attach a `projectId`.
 
 ---
 
